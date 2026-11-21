@@ -7,3 +7,6 @@
   tokens, JWTs and token-like URL query parameters are hidden by default);
   the install-once global `HiLog` entry with lazy messages; and the
   `HiConsoleLogSink` console sink.
+- `HiAnalytics` and `HiCrashReporter` contracts with `HiScalar` values and
+  no-op, console, composite and consent-gated implementations; observable
+  `HiConsent` privacy consent.

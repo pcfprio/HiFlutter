@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:hiflutter_base/hiflutter_base.dart';
 
-void main() {
+Future<void> main() async {
   // Install the global log entry once; it cannot be replaced afterwards.
   HiLog.install(
     HiLogger([
@@ -35,4 +35,23 @@ void main() {
   };
   print('${error.kind} (${error.display}): $action');
   print(error.diagnostics);
+
+  // Nothing leaves the app until the user agrees; unknown counts as no.
+  final consent = HiConsent();
+  final analytics = HiConsentGatedAnalytics(
+    HiCompositeAnalytics([const HiConsoleAnalytics()]),
+    consent: consent,
+  );
+  final crashes = HiConsentGatedCrashReporter(
+    const HiConsoleCrashReporter(),
+    consent: consent,
+  );
+
+  await analytics.track('app_open'); // Dropped.
+  consent.grant();
+  await analytics.identify('$id', traits: {'vip': HiScalar(vip)});
+  await analytics.page('profile', properties: {'score': HiScalar(score)});
+  await crashes.addBreadcrumb('opened profile', category: 'nav');
+  await crashes.captureException(error);
+  await analytics.reset(); // Always passes through, e.g. on sign out.
 }
