@@ -11,6 +11,7 @@ import 'stages.dart';
 /// Options:
 /// - `--root <dir>`: workspace to check (defaults to this repository).
 /// - `--only <id,...>`: run just the named stages, in their normal order.
+/// - `--build`: also run the showcase app smoke build (`build` stage).
 Future<int> runCheck(
   List<String> args, {
   StringSink? out,
@@ -20,8 +21,14 @@ Future<int> runCheck(
   final parser = ArgParser()
     ..addOption('root', help: 'Workspace root to check.')
     ..addMultiOption('only', help: 'Run only these stage ids.')
+    ..addFlag(
+      'build',
+      negatable: false,
+      help: 'Also run the showcase app smoke build.',
+    )
     ..addFlag('help', abbr: 'h', negatable: false);
-  final all = stages ?? defaultStages();
+  final defaults = stages ?? defaultStages();
+  final all = stages ?? allStages(includeBuild: true);
 
   final ArgResults options;
   try {
@@ -34,7 +41,10 @@ Future<int> runCheck(
   if (options.flag('help')) {
     sink.writeln('Usage: dart run tool/check.dart [options]');
     sink.writeln(parser.usage);
-    sink.writeln('\nStages: ${all.map((s) => s.id).join(', ')}');
+    sink.writeln(
+      '\nStages: ${defaults.map((s) => s.id).join(', ')}'
+      '${stages == null ? ' (optional with --build: build)' : ''}',
+    );
     return 0;
   }
 
@@ -45,8 +55,9 @@ Future<int> runCheck(
     sink.writeln('Stages: ${all.map((s) => s.id).join(', ')}');
     return 64;
   }
+  final defaultRun = stages ?? allStages(includeBuild: options.flag('build'));
   final selected = only.isEmpty
-      ? all
+      ? defaultRun
       : all.where((s) => only.contains(s.id)).toList();
 
   final root = p.normalize(
