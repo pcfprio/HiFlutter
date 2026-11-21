@@ -2,7 +2,19 @@ import 'dart:convert';
 
 import 'package:hiflutter_base/hiflutter_base.dart';
 
-void main() {
+Future<void> main() async {
+  // Install the global log entry once; it cannot be replaced afterwards.
+  HiLog.install(
+    HiLogger([
+      HiLogRoute(const HiConsoleLogSink(), minLevel: HiLogLevel.debug),
+    ]),
+  );
+  HiLog.info(
+    () => 'GET /v1/me?access_token=abc123',
+    module: 'net',
+    attributes: {'Authorization': 'Bearer abc123', 'status': 200},
+  );
+
   // Backends disagree on field names and types; read them leniently.
   final json = jsonDecode(
     '{"uid":"42","nick":"Ada","vip":"1","score":"9.5"}',
@@ -23,4 +35,23 @@ void main() {
   };
   print('${error.kind} (${error.display}): $action');
   print(error.diagnostics);
+
+  // Nothing leaves the app until the user agrees; unknown counts as no.
+  final consent = HiConsent();
+  final analytics = HiConsentGatedAnalytics(
+    HiCompositeAnalytics([const HiConsoleAnalytics()]),
+    consent: consent,
+  );
+  final crashes = HiConsentGatedCrashReporter(
+    const HiConsoleCrashReporter(),
+    consent: consent,
+  );
+
+  await analytics.track('app_open'); // Dropped.
+  consent.grant();
+  await analytics.identify('$id', traits: {'vip': HiScalar(vip)});
+  await analytics.page('profile', properties: {'score': HiScalar(score)});
+  await crashes.addBreadcrumb('opened profile', category: 'nav');
+  await crashes.captureException(error);
+  await analytics.reset(); // Always passes through, e.g. on sign out.
 }

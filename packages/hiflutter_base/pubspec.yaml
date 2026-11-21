@@ -1,13 +1,15 @@
 name: hiflutter_base
 description: >-
-  Pure Dart foundation of HiFlutter: a layered error model, lenient type
-  conversion and multi-candidate map lookup.
+  Pure Dart foundation of HiFlutter: a layered error model, routed logging
+  with default redaction, lenient type conversion, multi-candidate map
+  lookup, and consent-gated analytics and crash reporting contracts.
 version: 0.1.0
 repository: https://github.com/pcfprio/HiFlutter/tree/main/packages/hiflutter_base
 issue_tracker: https://github.com/pcfprio/HiFlutter/issues
 topics:
   - error-handling
   - json
+  - logging
   - utilities
 
 environment:
