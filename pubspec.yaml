@@ -7,6 +7,9 @@ environment:
 
 workspace:
   - packages/hiflutter_base
+  - packages/hiflutter_nav
+  - packages/hiflutter_nav_go_router
+  - packages/hiflutter_nav_url_launcher
 
 dev_dependencies:
   args: ^2.7.0
