@@ -50,6 +50,21 @@ class TestStage implements CheckStage {
   }
 }
 
+/// Whether git reports uncommitted changes under [dir] (false outside git).
+Future<bool> _isDirty(String dir) async {
+  try {
+    final result = await Process.run('git', [
+      'status',
+      '--porcelain',
+      '--',
+      '.',
+    ], workingDirectory: dir);
+    return result.exitCode == 0 && (result.stdout as String).trim().isNotEmpty;
+  } on ProcessException {
+    return false;
+  }
+}
+
 /// Runs `pub publish --dry-run` for every publishable package.
 class PublishStage implements CheckStage {
   @override
@@ -70,7 +85,11 @@ class PublishStage implements CheckStage {
             '--dry-run',
           ], workingDirectory: pkg.dir) !=
           0) {
-        problems.add('${pkg.name}: publish dry-run reported problems');
+        problems.add(
+          '${pkg.name}: publish dry-run reported problems'
+          '${await _isDirty(pkg.dir) ? ' (it also warns about uncommitted '
+                    'changes in the package: commit them, then re-run)' : ''}',
+        );
       }
     }
     return StageResult.of(problems);
