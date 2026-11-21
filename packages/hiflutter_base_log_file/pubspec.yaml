@@ -1,0 +1,31 @@
+name: hiflutter_base_log_file
+description: >-
+  File log sink for HiFlutter: daily rotation, a per-file size limit,
+  retention cleanup and a list of exportable log files, with a
+  path_provider factory for the application support directory.
+version: 0.1.0
+repository: https://github.com/pcfprio/HiFlutter/tree/main/packages/hiflutter_base_log_file
+issue_tracker: https://github.com/pcfprio/HiFlutter/issues
+topics:
+  - logging
+  - file
+  - utilities
+
+environment:
+  sdk: ^3.14.0
+  flutter: ">=3.50.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  hiflutter_base: ^0.1.0
+  path_provider: ^2.1.6
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+  path_provider_platform_interface: ^2.1.2
+  plugin_platform_interface: ^2.1.8
