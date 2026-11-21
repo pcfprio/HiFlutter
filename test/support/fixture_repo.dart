@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as p;
 
+import '../../tool/src/bump_version.dart';
 import '../../tool/src/check.dart';
 import '../../tool/src/stages/terms_stage.dart';
 
@@ -75,6 +76,17 @@ $deps''');
   Future<CheckRun> check(List<String> args) async {
     final out = StringBuffer();
     final code = await runCheck(['--root', root, ...args], out: out);
+    return CheckRun(code, out.toString());
+  }
+
+  /// Reads [relativePath] as a string.
+  String read(String relativePath) =>
+      File(p.join(root, relativePath)).readAsStringSync();
+
+  /// Runs `tool/bump_version.dart` against this fixture with [args].
+  Future<CheckRun> bumpVersion(List<String> args) async {
+    final out = StringBuffer();
+    final code = await runBumpVersion(['--root', root, ...args], out: out);
     return CheckRun(code, out.toString());
   }
 

@@ -1,0 +1,64 @@
+# Weekly breaking-update check of third-party dependencies.
+#
+# Runs `tool/deps_report.dart`; when it reports breaking updates (exit code 2)
+# it creates, or updates the body of, the one open issue labelled
+# `deps-breaking` with the fixed title below. With no breaking updates it
+# leaves the tracker alone. Third-party actions are pinned to commit SHAs; the
+# comment names the tag.
+name: deps
+
+on:
+  schedule:
+    - cron: "0 1 * * 1" # Mondays 01:00 UTC.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: deps
+  cancel-in-progress: false
+
+jobs:
+  report:
+    name: breaking dependency updates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          channel: stable
+          cache: true
+      - name: Resolve the workspace
+        run: flutter pub get
+      - name: Write the report
+        id: report
+        run: |
+          set +e
+          dart run tool/deps_report.dart --markdown > deps-report.md
+          code=$?
+          set -e
+          cat deps-report.md
+          case "$code" in
+            0) echo "breaking=false" >> "$GITHUB_OUTPUT" ;;
+            2) echo "breaking=true" >> "$GITHUB_OUTPUT" ;;
+            *) echo "deps_report.dart failed with exit code $code" >&2; exit "$code" ;;
+          esac
+      - name: Create or update the deps-breaking issue
+        if: steps.report.outputs.breaking == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITLE: 第三方依赖有可做的破坏性更新
+        run: |
+          number="$(gh issue list --repo "$GITHUB_REPOSITORY" \
+            --label deps-breaking --state open --limit 100 \
+            --json number,title \
+            --jq 'map(select(.title == env.TITLE)) | .[0].number // empty')"
+          if [ -n "$number" ]; then
+            gh issue edit "$number" --repo "$GITHUB_REPOSITORY" \
+              --body-file deps-report.md
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" \
+              --label deps-breaking --body-file deps-report.md
+          fi
