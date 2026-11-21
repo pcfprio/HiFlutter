@@ -1,0 +1,32 @@
+name: hiflutter_net_connectivity
+description: >-
+  connectivity_plus implementation of the HiFlutter HiConnectivity contract:
+  maps ConnectivityResult streams and checks to HiNetworkStatus and normalizes
+  platform errors to HiError without leaking third-party types.
+version: 0.1.0
+repository: https://github.com/pcfprio/HiFlutter/tree/main/packages/hiflutter_net_connectivity
+issue_tracker: https://github.com/pcfprio/HiFlutter/issues
+topics:
+  - connectivity
+  - network
+  - adapter
+
+environment:
+  sdk: ^3.14.0
+  flutter: ">=3.50.0"
+
+resolution: workspace
+
+dependencies:
+  connectivity_plus: ^7.3.2
+  flutter:
+    sdk: flutter
+  hiflutter_base: ^0.1.0
+  hiflutter_net: ^0.1.0
+
+dev_dependencies:
+  connectivity_plus_platform_interface: ^2.1.0
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+  plugin_platform_interface: ^2.1.8

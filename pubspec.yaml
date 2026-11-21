@@ -14,6 +14,7 @@ workspace:
   - packages/hiflutter_nav_go_router
   - packages/hiflutter_nav_url_launcher
   - packages/hiflutter_net
+  - packages/hiflutter_net_connectivity
   - packages/hiflutter_net_dio
   - packages/hiflutter_store
   - packages/hiflutter_store_prefs
