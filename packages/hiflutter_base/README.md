@@ -18,6 +18,17 @@ It has no third-party dependencies and works in any Dart or Flutter project.
 - **Multi-candidate lookup**: `map.pick('id|uid')` and its typed variants
   (`pickInt`, `pickString`, ...) read the first present key, for backends
   whose field names disagree.
+- **Analytics and crash reporting contracts**: `HiAnalytics` (`track`,
+  `identify`, `page`, `reset`, `flush`) and `HiCrashReporter`
+  (`captureException`, `captureMessage`, `setContext`, `addBreadcrumb`),
+  with values restricted to the sealed `HiScalar` type. Each comes with
+  no-op, console, composite (fan-out with failure isolation) and
+  consent-gated implementations. No vendor SDK is included; write an adapter
+  for yours.
+- **Privacy consent gate**: `HiConsent` holds an observable
+  `unknown` / `granted` / `denied` status. The consent-gated implementations
+  drop every outgoing call until consent is granted; unknown counts as not
+  granted, and analytics `reset` always passes through.
 
 ## Usage
 
@@ -36,6 +47,24 @@ try {
     // Offer a retry button.
   }
 }
+```
+
+Analytics and crash reporting are injected, never global. Wire them in the
+composition root behind the user's consent:
+
+```dart
+final consent = HiConsent(); // Restore a persisted decision via `initial`.
+final HiAnalytics analytics = HiConsentGatedAnalytics(
+  HiCompositeAnalytics([const HiConsoleAnalytics(), myVendorAnalytics]),
+  consent: consent,
+);
+
+await analytics.track('signup', properties: {'plan': HiScalar('pro')});
+// Dropped: consent is still unknown.
+
+consent.grant();
+await analytics.track('signup', properties: {'plan': HiScalar('pro')});
+// Sent to every delegate.
 ```
 
 See `example/main.dart` for a complete example.
