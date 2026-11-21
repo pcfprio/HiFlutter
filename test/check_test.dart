@@ -14,8 +14,20 @@ void main() {
 
     expect(
       run.output,
-      contains('Stages: format, analyze, test, deps, terms, versions, publish'),
+      contains(
+        'Stages: format, analyze, test, deps, terms, versions, publish, e2e',
+      ),
     );
+  });
+
+  test('e2e stage fails cleanly when hiflutter_net is absent', () async {
+    repo = await FixtureRepo.create(packages: ['hiflutter_base']);
+
+    final run = await repo.check(['--only', 'e2e']);
+
+    expect(run.exitCode, isNot(0), reason: '$run');
+    expect(run.output, contains('FAIL e2e'));
+    expect(run.output, contains('hiflutter_net'));
   });
 
   test('rejects an unknown stage id', () async {
