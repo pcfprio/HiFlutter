@@ -1,0 +1,27 @@
+name: hiflutter_nav
+description: >-
+  Navigation contracts of HiFlutter: typed routes, a URL route table,
+  deep-link allow-listing, and router-agnostic navigation and link-opening
+  interfaces.
+version: 0.1.0
+repository: https://github.com/pcfprio/HiFlutter/tree/main/packages/hiflutter_nav
+issue_tracker: https://github.com/pcfprio/HiFlutter/issues
+topics:
+  - navigation
+  - router
+  - deep-linking
+
+environment:
+  sdk: ^3.14.0
+  flutter: ">=3.50.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter

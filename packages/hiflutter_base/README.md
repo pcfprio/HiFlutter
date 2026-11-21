@@ -12,17 +12,50 @@ It has no third-party dependencies and works in any Dart or Flutter project.
   `retryable` flag and a `display` category for localized UI. The original
   exception is kept only as `diagnostics` text, so third-party types never
   leak into your code.
+- **Logging**: a `HiLogger` sends each record to several `HiLogRoute`s,
+  each with its own minimum level and `HiRedaction` policy. The default
+  route drops `debug` and hides sensitive keys (`password`, `token`,
+  `authorization`, `cookie`, `secret`, ...), Bearer tokens, JWTs and
+  token-like URL query parameters; raw output needs an explicit
+  `HiRedaction.none()`. Sinks implement `HiLogSink` and only ever receive
+  read-only, already processed `HiLogRecord`s. Install the global `HiLog`
+  entry once at startup and log from anywhere; before that, logging does
+  nothing. Messages are closures, so filtered logs cost nothing.
+  `HiConsoleLogSink` writes to the developer console.
 - **Lenient conversion**: `HiConvert.asInt`, `asDouble`, `asBool`,
   `asString`, `asList` and `asMap` turn loosely typed JSON values into Dart
   types, returning `null` instead of throwing.
 - **Multi-candidate lookup**: `map.pick('id|uid')` and its typed variants
   (`pickInt`, `pickString`, ...) read the first present key, for backends
   whose field names disagree.
+- **Analytics and crash reporting contracts**: `HiAnalytics` (`track`,
+  `identify`, `page`, `reset`, `flush`) and `HiCrashReporter`
+  (`captureException`, `captureMessage`, `setContext`, `addBreadcrumb`),
+  with values restricted to the sealed `HiScalar` type. Each comes with
+  no-op, console, composite (fan-out with failure isolation) and
+  consent-gated implementations. No vendor SDK is included; write an adapter
+  for yours.
+- **Privacy consent gate**: `HiConsent` holds an observable
+  `unknown` / `granted` / `denied` status. The consent-gated implementations
+  drop every outgoing call until consent is granted; unknown counts as not
+  granted, and analytics `reset` always passes through.
 
 ## Usage
 
 ```dart
 import 'package:hiflutter_base/hiflutter_base.dart';
+
+// Once, in the composition root.
+HiLog.install(HiLogger([
+  HiLogRoute(const HiConsoleLogSink(), minLevel: HiLogLevel.debug),
+]));
+
+// Anywhere.
+HiLog.info(
+  () => 'GET /feed?access_token=abc', // logged as access_token=[REDACTED]
+  module: 'net',
+  attributes: {'Authorization': 'Bearer abc'}, // logged as [REDACTED]
+);
 
 final json = {'uid': '42', 'vip': 'yes'};
 final id = json.pickInt('id|uid');       // 42
@@ -36,6 +69,24 @@ try {
     // Offer a retry button.
   }
 }
+```
+
+Analytics and crash reporting are injected, never global. Wire them in the
+composition root behind the user's consent:
+
+```dart
+final consent = HiConsent(); // Restore a persisted decision via `initial`.
+final HiAnalytics analytics = HiConsentGatedAnalytics(
+  HiCompositeAnalytics([const HiConsoleAnalytics(), myVendorAnalytics]),
+  consent: consent,
+);
+
+await analytics.track('signup', properties: {'plan': HiScalar('pro')});
+// Dropped: consent is still unknown.
+
+consent.grant();
+await analytics.track('signup', properties: {'plan': HiScalar('pro')});
+// Sent to every delegate.
 ```
 
 See `example/main.dart` for a complete example.

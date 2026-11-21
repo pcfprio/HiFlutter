@@ -127,19 +127,22 @@ const packageRules = <String, PackageRule>{
     internal: {_store, _base},
   ),
   // suite: the Spec table pre-installs intl (gen-l10n) for this contract.
+  // Since Flutter 3.47 the Material library lives in the flutter.dev package
+  // `material_ui`, so Material 3 widgets come from there.
   _suite: PackageRule(
     PackageRole.contract,
     internal: {_base, _core},
     flutter: true,
-    extraThirdParty: {'intl'},
+    extraThirdParty: {'intl', 'material_ui'},
   ),
   'hiflutter_suite_cached_image': PackageRule(
     PackageRole.adapter,
     internal: {_suite, _base},
   ),
+  // The web page hands external links to the nav link-opener contract.
   'hiflutter_suite_webview': PackageRule(
     PackageRole.adapter,
-    internal: {_suite, _base},
+    internal: {_suite, _base, _nav},
   ),
   // integration, umbrella, tool
   'hiflutter_riverpod': PackageRule(
