@@ -1,0 +1,16 @@
+name: hiflutter_workspace
+description: Workspace root for the HiFlutter packages. Not published.
+publish_to: none
+
+environment:
+  sdk: ^3.14.0
+
+workspace:
+  - packages/hiflutter_base
+
+dev_dependencies:
+  args: ^2.7.0
+  lints: ^6.1.0
+  path: ^1.9.1
+  test: ^1.26.0
+  yaml: ^3.1.3
