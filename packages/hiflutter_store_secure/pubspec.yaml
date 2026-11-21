@@ -1,0 +1,31 @@
+name: hiflutter_store_secure
+description: >-
+  flutter_secure_storage adapter for hiflutter_store: Keychain and
+  Keystore-backed secret storage behind the HiSecureStore contract.
+version: 0.1.0
+repository: https://github.com/pcfprio/HiFlutter/tree/main/packages/hiflutter_store_secure
+issue_tracker: https://github.com/pcfprio/HiFlutter/issues
+topics:
+  - storage
+  - security
+  - keychain
+
+environment:
+  sdk: ^3.14.0
+  flutter: ">=3.50.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_secure_storage: ^11.2.0
+  hiflutter_store: ^0.1.0
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_secure_storage_platform_interface: ^2.1.1
+  flutter_test:
+    sdk: flutter
+  hiflutter_base: ^0.1.0
+  test: ^1.26.0
