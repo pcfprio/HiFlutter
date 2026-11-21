@@ -3,6 +3,18 @@ import 'dart:convert';
 import 'package:hiflutter_base/hiflutter_base.dart';
 
 void main() {
+  // Install the global log entry once; it cannot be replaced afterwards.
+  HiLog.install(
+    HiLogger([
+      HiLogRoute(const HiConsoleLogSink(), minLevel: HiLogLevel.debug),
+    ]),
+  );
+  HiLog.info(
+    () => 'GET /v1/me?access_token=abc123',
+    module: 'net',
+    attributes: {'Authorization': 'Bearer abc123', 'status': 200},
+  );
+
   // Backends disagree on field names and types; read them leniently.
   final json = jsonDecode(
     '{"uid":"42","nick":"Ada","vip":"1","score":"9.5"}',

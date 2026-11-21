@@ -12,6 +12,16 @@ It has no third-party dependencies and works in any Dart or Flutter project.
   `retryable` flag and a `display` category for localized UI. The original
   exception is kept only as `diagnostics` text, so third-party types never
   leak into your code.
+- **Logging**: a `HiLogger` sends each record to several `HiLogRoute`s,
+  each with its own minimum level and `HiRedaction` policy. The default
+  route drops `debug` and hides sensitive keys (`password`, `token`,
+  `authorization`, `cookie`, `secret`, ...), Bearer tokens, JWTs and
+  token-like URL query parameters; raw output needs an explicit
+  `HiRedaction.none()`. Sinks implement `HiLogSink` and only ever receive
+  read-only, already processed `HiLogRecord`s. Install the global `HiLog`
+  entry once at startup and log from anywhere; before that, logging does
+  nothing. Messages are closures, so filtered logs cost nothing.
+  `HiConsoleLogSink` writes to the developer console.
 - **Lenient conversion**: `HiConvert.asInt`, `asDouble`, `asBool`,
   `asString`, `asList` and `asMap` turn loosely typed JSON values into Dart
   types, returning `null` instead of throwing.
@@ -23,6 +33,18 @@ It has no third-party dependencies and works in any Dart or Flutter project.
 
 ```dart
 import 'package:hiflutter_base/hiflutter_base.dart';
+
+// Once, in the composition root.
+HiLog.install(HiLogger([
+  HiLogRoute(const HiConsoleLogSink(), minLevel: HiLogLevel.debug),
+]));
+
+// Anywhere.
+HiLog.info(
+  () => 'GET /feed?access_token=abc', // logged as access_token=[REDACTED]
+  module: 'net',
+  attributes: {'Authorization': 'Bearer abc'}, // logged as [REDACTED]
+);
 
 final json = {'uid': '42', 'vip': 'yes'};
 final id = json.pickInt('id|uid');       // 42
