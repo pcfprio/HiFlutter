@@ -6,3 +6,6 @@ library;
 export 'src/convert.dart';
 export 'src/error.dart';
 export 'src/map_pick.dart';
+export 'src/consent.dart';
+export 'src/scalar.dart';
+export 'src/analytics.dart';
