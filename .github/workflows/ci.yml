@@ -1,0 +1,48 @@
+# Runs the repository check (`dart run tool/check.dart`) on every push and
+# pull request, plus the `--build` smoke build of the showcase app on macOS.
+# Third-party actions are pinned to commit SHAs; the comment names the tag.
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          channel: stable
+          cache: true
+      - name: Resolve the workspace
+        run: flutter pub get
+      - name: Run the repository check
+        run: dart run tool/check.dart
+
+  build-smoke:
+    name: build smoke (macOS)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          channel: stable
+          cache: true
+      - name: Resolve the workspace
+        run: flutter pub get
+      - name: Run the repository check with the smoke build
+        run: dart run tool/check.dart --build
