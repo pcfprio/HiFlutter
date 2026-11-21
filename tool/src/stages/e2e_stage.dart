@@ -1,9 +1,33 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as p;
 
 import '../stage.dart';
 import '../workspace.dart';
+
+/// Returns `true` when [packageConfigPath] exists, contains valid JSON, and
+/// lists [packageName] in its `packages` array.
+bool isPackageConfigured(String packageConfigPath, String packageName) {
+  final file = File(packageConfigPath);
+  if (!file.existsSync()) return false;
+  try {
+    final decoded = jsonDecode(file.readAsStringSync());
+    if (decoded is! Map<Object?, Object?>) return false;
+    final packages = decoded['packages'];
+    if (packages is! List<Object?>) return false;
+    for (final entry in packages) {
+      if (entry is Map<Object?, Object?> && entry['name'] == packageName) {
+        return true;
+      }
+    }
+    return false;
+  } on FormatException {
+    return false;
+  } on FileSystemException {
+    return false;
+  }
+}
 
 /// Rehearses consumer integration modes (`source` and `pin`) end-to-end
 /// against a temporary git clone of this workspace.
@@ -16,9 +40,8 @@ class E2eStage implements CheckStage {
 
   @override
   Future<StageResult> run(CheckContext context) async {
-    final members = {
-      for (final pkg in loadWorkspace(context.root)) pkg.name: pkg,
-    };
+    final workspace = loadWorkspace(context.root);
+    final members = {for (final pkg in workspace) pkg.name: pkg};
     final netPkg = members['hiflutter_net'];
     if (netPkg == null || netPkg.version == null) {
       return StageResult.fail([
@@ -42,6 +65,16 @@ class E2eStage implements CheckStage {
     );
     if (!File(toolBin).existsSync()) {
       return StageResult.fail(['Missing hiflutter binary script at $toolBin.']);
+    }
+
+    if (!isPackageConfigured(packageConfig, 'hiflutter_tool')) {
+      final tool = workspace.any((pkg) => pkg.isFlutter) ? 'flutter' : 'dart';
+      if (await context.exec(tool, ['pub', 'get']) != 0) {
+        return StageResult.fail([
+          '`$tool pub get` failed while preparing workspace package '
+              'configuration.',
+        ]);
+      }
     }
 
     final tmpDir = await Directory.systemTemp.createTemp('hiflutter_e2e_');
