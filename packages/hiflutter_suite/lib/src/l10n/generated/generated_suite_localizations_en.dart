@@ -83,4 +83,16 @@ class GeneratedSuiteLocalizationsEn extends GeneratedSuiteLocalizations {
   @override
   String get errorGenericMessage =>
       'An unexpected error occurred. Please try again.';
+
+  @override
+  String get confirmLabel => 'Confirm';
+
+  @override
+  String get cancelLabel => 'Cancel';
+
+  @override
+  String get searchHint => 'Search';
+
+  @override
+  String get clearLabel => 'Clear';
 }

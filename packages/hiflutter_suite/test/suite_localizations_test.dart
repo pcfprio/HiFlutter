@@ -11,6 +11,18 @@ class _CustomSuiteLocalizations extends HiSuiteLocalizations {
 
   @override
   String get errorNetworkTitle => 'Custom Offline';
+
+  @override
+  String get confirmLabel => 'Proceed';
+
+  @override
+  String get cancelLabel => 'Dismiss';
+
+  @override
+  String get searchHint => 'Filter items';
+
+  @override
+  String get clearLabel => 'Reset';
 }
 
 class _CustomSuiteLocalizationsDelegate
@@ -39,6 +51,10 @@ void main() {
       expect(en.loadMorePromptLabel, 'Load more');
       expect(en.loadMoreNoMoreLabel, 'No more items');
       expect(en.loadMoreFailedLabel, 'Failed to load more');
+      expect(en.confirmLabel, 'Confirm');
+      expect(en.cancelLabel, 'Cancel');
+      expect(en.searchHint, 'Search');
+      expect(en.clearLabel, 'Clear');
 
       final zh = HiSuiteLocalizations.forLocale(const Locale('zh'));
       expect(zh.loadingLabel, '正在加载');
@@ -48,6 +64,10 @@ void main() {
       expect(zh.loadMorePromptLabel, '加载更多');
       expect(zh.loadMoreNoMoreLabel, '没有更多了');
       expect(zh.loadMoreFailedLabel, '加载失败');
+      expect(zh.confirmLabel, '确定');
+      expect(zh.cancelLabel, '取消');
+      expect(zh.searchHint, '搜索');
+      expect(zh.clearLabel, '清除');
 
       final zhHans = HiSuiteLocalizations.forLocale(
         const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'),
@@ -175,6 +195,10 @@ void main() {
 
         expect(resolved.retryLabel, 'Try Again Now');
         expect(resolved.loadingLabel, 'Loading');
+        expect(resolved.confirmLabel, 'Proceed');
+        expect(resolved.cancelLabel, 'Dismiss');
+        expect(resolved.searchHint, 'Filter items');
+        expect(resolved.clearLabel, 'Reset');
         expect(
           resolved.describeError(const HiNetworkError()).title,
           'Custom Offline',

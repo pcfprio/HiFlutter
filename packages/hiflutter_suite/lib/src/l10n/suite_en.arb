@@ -22,5 +22,9 @@
   "errorDataTitle": "Unable to load data",
   "errorDataMessage": "The data format could not be read.",
   "errorGenericTitle": "Something went wrong",
-  "errorGenericMessage": "An unexpected error occurred. Please try again."
+  "errorGenericMessage": "An unexpected error occurred. Please try again.",
+  "confirmLabel": "Confirm",
+  "cancelLabel": "Cancel",
+  "searchHint": "Search",
+  "clearLabel": "Clear"
 }
