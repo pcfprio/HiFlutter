@@ -174,5 +174,47 @@ void main() {
         expect(sink.records.map((r) => r.message), contains('bootstrapped'));
       },
     );
+
+    testWidgets(
+      'accepts caller overrides that also bind hiLoggerProvider and hiCrashReporterProvider',
+      (tester) async {
+        final bootstrapLogger = HiLogger(const []);
+        const bootstrapReporter = HiNoOpCrashReporter();
+        final overrideLogger = HiLogger(const []);
+        final overrideReporter = _RecordingCrashReporter();
+
+        late HiLogger observedLogger;
+        late HiCrashReporter observedReporter;
+        Widget? mountedApp;
+
+        final capture = await HiRiverpodBootstrap.run(
+          logger: bootstrapLogger,
+          reporter: bootstrapReporter,
+          installLogger: (_) {},
+          overrides: hiProviderOverrides(
+            logger: overrideLogger,
+            crashReporter: overrideReporter,
+          ),
+          runAppCallback: (app) => mountedApp = app,
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Consumer(
+              builder: (context, ref, _) {
+                observedLogger = ref.watch(hiLoggerProvider);
+                observedReporter = ref.watch(hiCrashReporterProvider);
+                return const Text('nested');
+              },
+            ),
+          ),
+        );
+        addTearDown(capture.dispose);
+
+        expect(mountedApp, isA<ProviderScope>());
+        await tester.pumpWidget(mountedApp!);
+        expect(find.text('nested'), findsOneWidget);
+        expect(observedLogger, same(overrideLogger));
+        expect(observedReporter, same(overrideReporter));
+      },
+    );
   });
 }
