@@ -7,6 +7,7 @@ environment:
 
 workspace:
   - packages/hiflutter_base
+  - packages/hiflutter_core
 
 dev_dependencies:
   args: ^2.7.0
