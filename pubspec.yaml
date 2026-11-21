@@ -20,6 +20,7 @@ workspace:
   - packages/hiflutter_store_prefs
   - packages/hiflutter_store_secure
   - packages/hiflutter_store_file
+  - packages/hiflutter_tool
 
 dev_dependencies:
   args: ^2.7.0
