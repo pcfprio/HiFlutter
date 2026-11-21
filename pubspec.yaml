@@ -21,6 +21,8 @@ workspace:
   - packages/hiflutter_store_secure
   - packages/hiflutter_store_file
   - packages/hiflutter_suite
+  - packages/hiflutter_suite_cached_image
+  - packages/hiflutter_suite_webview
   - packages/hiflutter_tool
 
 dev_dependencies:

@@ -1,0 +1,35 @@
+name: hiflutter_suite_webview
+description: >-
+  webview_flutter adapter for HiFlutter: provides HiWebViewPage with Material 3
+  chrome, loading progress, error retry via HiErrorView, and external link
+  handoff via HiLinkOpener.
+version: 0.1.0
+repository: https://github.com/pcfprio/HiFlutter/tree/main/packages/hiflutter_suite_webview
+issue_tracker: https://github.com/pcfprio/HiFlutter/issues
+topics:
+  - webview
+  - browser
+  - widgets
+  - adapter
+
+environment:
+  sdk: ^3.14.0
+  flutter: ">=3.50.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  hiflutter_base: ^0.1.0
+  hiflutter_nav: ^0.1.0
+  hiflutter_suite: ^0.1.0
+  material_ui: ^1.11.1
+  webview_flutter: ^4.14.1
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+  plugin_platform_interface: ^2.1.8
+  webview_flutter_platform_interface: ^2.15.1
