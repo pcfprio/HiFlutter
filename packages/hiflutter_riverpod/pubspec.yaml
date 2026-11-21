@@ -1,0 +1,35 @@
+name: hiflutter_riverpod
+description: >-
+  Optional Riverpod integration for HiFlutter: dependency-injection providers
+  for every contract, a Riverpod Notifier pagination adapter, and an ordered
+  application bootstrap skeleton.
+version: 0.1.0
+repository: https://github.com/pcfprio/HiFlutter/tree/main/packages/hiflutter_riverpod
+issue_tracker: https://github.com/pcfprio/HiFlutter/issues
+topics:
+  - riverpod
+  - state-management
+  - dependency-injection
+  - pagination
+
+environment:
+  sdk: ^3.14.0
+  flutter: ">=3.50.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^3.5.0
+  hiflutter_base: ^0.1.0
+  hiflutter_core: ^0.1.0
+  hiflutter_nav: ^0.1.0
+  hiflutter_net: ^0.1.0
+  hiflutter_store: ^0.1.0
+  hiflutter_suite: ^0.1.0
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter

@@ -1,0 +1,21 @@
+# Dart / Flutter
+.dart_tool/
+build/
+pubspec.lock
+pubspec_overrides.yaml
+.flutter-plugins
+.flutter-plugins-dependencies
+coverage/
+doc/api/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+
+# Agent tooling
+.claude/worktrees/
+.claude/settings.local.json

@@ -1,0 +1,41 @@
+name: hiflutter
+description: >-
+  Umbrella package of HiFlutter: re-exports the core contracts and default
+  non-vendor adapters for logging, observability, networking, navigation,
+  storage, device info, and Material 3 UI components.
+version: 0.1.0
+repository: https://github.com/pcfprio/HiFlutter/tree/main/packages/hiflutter
+issue_tracker: https://github.com/pcfprio/HiFlutter/issues
+topics:
+  - flutter
+  - utilities
+  - architecture
+
+environment:
+  sdk: ^3.14.0
+  flutter: ">=3.50.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  hiflutter_base: ^0.1.0
+  hiflutter_base_log_file: ^0.1.0
+  hiflutter_core: ^0.1.0
+  hiflutter_core_device: ^0.1.0
+  hiflutter_nav: ^0.1.0
+  hiflutter_nav_go_router: ^0.1.0
+  hiflutter_nav_url_launcher: ^0.1.0
+  hiflutter_net: ^0.1.0
+  hiflutter_net_dio: ^0.1.0
+  hiflutter_store: ^0.1.0
+  hiflutter_store_file: ^0.1.0
+  hiflutter_store_prefs: ^0.1.0
+  hiflutter_store_secure: ^0.1.0
+  hiflutter_suite: ^0.1.0
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter

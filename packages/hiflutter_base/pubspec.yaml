@@ -1,0 +1,22 @@
+name: hiflutter_base
+description: >-
+  Pure Dart foundation of HiFlutter: a layered error model, routed logging
+  with default redaction, lenient type conversion, multi-candidate map
+  lookup, and consent-gated analytics and crash reporting contracts.
+version: 0.1.0
+repository: https://github.com/pcfprio/HiFlutter/tree/main/packages/hiflutter_base
+issue_tracker: https://github.com/pcfprio/HiFlutter/issues
+topics:
+  - error-handling
+  - json
+  - logging
+  - utilities
+
+environment:
+  sdk: ^3.14.0
+
+resolution: workspace
+
+dev_dependencies:
+  lints: ^6.1.0
+  test: ^1.26.0

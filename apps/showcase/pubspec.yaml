@@ -1,0 +1,29 @@
+name: hiflutter_showcase
+description: Showcase Flutter app demonstrating every HiFlutter package family.
+publish_to: none
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.14.0
+  flutter: ">=3.50.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^3.5.0
+  hiflutter: ^0.1.0
+  hiflutter_net_connectivity: ^0.1.0
+  hiflutter_riverpod: ^0.1.0
+  hiflutter_suite_cached_image: ^0.1.0
+  hiflutter_suite_webview: ^0.1.0
+  material_ui: ^1.11.1
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

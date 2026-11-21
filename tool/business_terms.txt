@@ -1,0 +1,6 @@
+# Business terms that must never appear in HiFlutter (case-insensitive).
+# One term per line; blank lines and lines starting with # are ignored.
+# This file is the only place allowed to contain them.
+AtlasHub
+QuizMind
+Willscurated

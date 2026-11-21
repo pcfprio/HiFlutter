@@ -1,0 +1,97 @@
+import 'dart:async';
+
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
+import 'package:hiflutter_base/hiflutter_base.dart';
+import 'package:hiflutter_core/hiflutter_core.dart';
+
+import 'providers.dart';
+
+/// Ordered application startup skeleton for Riverpod-backed HiFlutter apps.
+///
+/// Startup always executes in four deterministic steps:
+/// 1. Install the global [HiLog] entry once with `logger`.
+/// 2. Install global [HiErrorCapture] routing framework, platform, and zone
+///    errors into `reporter` and [HiLog].
+/// 3. Initialize the Flutter binding and run optional async preparation inside
+///    the guarded zone, wrapping the root widget in a [ProviderScope] with
+///    the configured contract overrides.
+/// 4. Mount the root widget with `runApp`.
+abstract final class HiRiverpodBootstrap {
+  /// Runs the ordered startup sequence and mounts [child] (or the widget
+  /// returned by [builder]) inside a [ProviderScope].
+  ///
+  /// Exactly one of [child] or [builder] must be provided. Both [logger] and
+  /// [reporter] are automatically bound to [hiLoggerProvider] and
+  /// [hiCrashReporterProvider], followed by any extra [overrides] or
+  /// post-initialization [overridesBuilder] from the composition root.
+  /// Optional [beforeRunApp] runs inside the guarded zone after
+  /// [WidgetsFlutterBinding.ensureInitialized] and before [overridesBuilder],
+  /// [builder], and `runApp` are called.
+  ///
+  /// The optional [installLogger], [installErrorCapture], and [runAppCallback]
+  /// hooks default to [HiLog.install], [HiErrorCapture.install], and [runApp],
+  /// allowing tests to verify ordering or observe mounted roots without global
+  /// side effects.
+  static Future<HiErrorCapture> run({
+    required HiLogger logger,
+    required HiCrashReporter reporter,
+    Widget? child,
+    Widget Function()? builder,
+    List<Override> overrides = const [],
+    FutureOr<List<Override>> Function()? overridesBuilder,
+    String errorModule = 'error',
+    FutureOr<void> Function()? beforeRunApp,
+    void Function(HiLogger logger)? installLogger,
+    HiErrorCapture Function({required HiCrashReporter reporter, String module})?
+    installErrorCapture,
+    void Function(Widget app)? runAppCallback,
+  }) async {
+    assert(
+      (child != null) != (builder != null),
+      'Provide either child or builder (not both) to HiRiverpodBootstrap.run.',
+    );
+    (installLogger ?? HiLog.install)(logger);
+    final capture = (installErrorCapture ?? HiErrorCapture.install)(
+      reporter: reporter,
+      module: errorModule,
+    );
+
+    final done = Completer<void>();
+    capture.runGuarded<void>(() async {
+      try {
+        WidgetsFlutterBinding.ensureInitialized();
+        if (beforeRunApp != null) {
+          await beforeRunApp();
+        }
+        final resolvedOverrides = <Override>[
+          ...overrides,
+          if (overridesBuilder != null) ...await overridesBuilder(),
+        ];
+        final rootChild = builder != null ? builder() : child!;
+        // Nest caller overrides inside a child ProviderScope so callers passing
+        // a full `hiProviderOverrides(...)` list never trigger Riverpod's
+        // duplicate-override assertion inside a single scope, while preserving
+        // caller overrides precedence.
+        final defaultScope = ProviderScope(
+          overrides: [
+            hiLoggerProvider.overrideWithValue(logger),
+            hiCrashReporterProvider.overrideWithValue(reporter),
+          ],
+          child: resolvedOverrides.isEmpty
+              ? rootChild
+              : ProviderScope(overrides: resolvedOverrides, child: rootChild),
+        );
+        (runAppCallback ?? runApp)(defaultScope);
+      } finally {
+        if (!done.isCompleted) {
+          done.complete();
+        }
+      }
+    });
+
+    await done.future;
+    return capture;
+  }
+}
