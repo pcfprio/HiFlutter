@@ -88,7 +88,7 @@ Future<int> runBumpVersion(List<String> args, {StringSink? out}) async {
 }
 
 /// Entry written for a package that changed nothing in this release.
-const alignedEntry = '- 版本对齐，无变化';
+const alignedEntry = '- Version alignment (no changes).';
 
 /// Header of the section collecting changes not yet in a release.
 final _unreleased = RegExp(r'^## Unreleased[ \t]*$', multiLine: true);

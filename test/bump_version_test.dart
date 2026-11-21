@@ -54,7 +54,7 @@ void main() {
       );
       expect(
         repo.read('packages/hiflutter_net/CHANGELOG.md'),
-        '## 0.2.0\n\n- 版本对齐，无变化\n\n## 0.1.0\n\n- Fixture.\n',
+        '## 0.2.0\n\n- Version alignment (no changes).\n\n## 0.1.0\n\n- Fixture.\n',
       );
     },
   );
