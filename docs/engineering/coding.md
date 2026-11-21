@@ -12,9 +12,9 @@
 
 1. **`Hi` 类型前缀**：所有公开导出的类、接口、枚举、mixin、extension 与 typedef 统一以 `Hi` 为前缀（如 `HiLogger`、`HiError`、`HiHttpClient`、`HiRoute`、`HiKeyValueStore`、`HiPrimaryButton`）；公开辅助顶级函数尽量以 `hi` 为前缀（如 `hiProviderOverrides`、`hiPaginationProvider`）。
 2. **第三方类型隔离**：第三方依赖类型与异常只能停留在适配包内部实现或明确隔离的测试入口文件（如 `hiflutter_net_dio` 与 `hiflutter_core_device` 单独拆出的 `lib/testing.dart`）中，绝不出现在契约包、伞包或适配器主入口的签名与返回值里。
-3. **禁止导入已弃用的 `package:flutter/material.dart`**：
-   - 通用 Flutter 包（`hiflutter_core`、`hiflutter_nav`、`hiflutter_riverpod` 等）统一导入 `package:flutter/widgets.dart` 与 `package:flutter/foundation.dart`；
-   - 需要 Material 3 组件时，仅可在 `tool/src/package_rules.dart` 明确允许依赖 `material_ui` 的 UI 包（`hiflutter_suite` 及其适配包）与 `apps/showcase` 中导入 `package:material_ui/material_ui.dart`。
+3. **使用 `widgets.dart` 与 `material_ui` 替代 `package:flutter/material.dart`**：
+   - 通用 Flutter 代码导入 `package:flutter/widgets.dart` 与 `package:flutter/foundation.dart`；需要 Material 3 组件时，仅在 `tool/src/package_rules.dart` 允许依赖 `material_ui` 的包与示例 App `apps/showcase` 中导入 `package:material_ui/material_ui.dart`；
+   - `dart run tool/check.dart` 的 `deps` 阶段（`DepsStage`）自动扫描工作区所有成员（含 `publish_to: none` 成员）的 `lib/`、`test/`、`example/`、`bin/`，拦截任何 `package:flutter/material.dart` 的导入或导出。
 4. **禁止全局可变单例（`HiLog.install` 例外）**：能力实例一律在应用组合根构建并通过构造器参数或 `hiflutter_riverpod` 的 `ProviderScope` 覆盖注入（[ADR-0002](../adr/0002-state-management-agnostic-core.md)、[ADR-0005](../adr/0005-global-log-entry-exception.md)）。禁止隐藏的静态服务定位器。
 5. **业务词屏蔽**：所有文件、路径、变量、注释与测试案例均不得出现 `tool/business_terms.txt` 中的任何产品名或特定业务词汇（受 `TermsStage` 强制拦截）。
 
@@ -34,8 +34,8 @@
 实施新功能与缺陷修复遵循红-绿-重构 TDD 节奏，且严格遵守以下边界：
 
 1. **公开入口即唯一测试缝（seam）**：
-   - 测试文件（`test/*_test.dart`）必须只导入包自己的公开库入口（如 `package:hiflutter_net/hiflutter_net.dart`），**禁止直接 import `package:.../src/...` 内部文件或断言私有字段与内部调用次序**。
-   - 测试只断言外部可观察行为：返回值、抛出 `HiError` 类型与属性、sink 收到的 `HiLogRecord`、存储读回结果、Widget 渲染节点与点击交互结果。
+   - 工作区成员包 `test/` 仅导入包自己的公开库入口（如 `package:hiflutter_net/hiflutter_net.dart`）；`dart run tool/check.dart` 的 `deps` 阶段（`DepsStage`）会自动拦截成员包 `test/` 直接导入或导出 `package:hiflutter*/src/` 及相对路径 `../lib/src/`（仓库根 `test/` 测工具脚本除外）。
+   - 测试只断言外部可观察行为（返回值、抛出 `HiError` 类型与属性、sink 收到的 `HiLogRecord`、存储读回结果、Widget 渲染节点与点击交互结果），不针对私有字段或内部调用次序编写断言。
 2. **第三方库最低替换点假实现**：
    - 适配包不连接真实网络或依赖真机通道；在第三方库官方提供的最低接口替换点注入轻量假实现：
      - `hiflutter_net_dio`、`hiflutter_core_device`：通过各自隔离的 `lib/testing.dart` 传入伪造 Dio `HttpClientAdapter` 或跨平台 `BaseDeviceInfo` 加载器；

@@ -15,7 +15,7 @@
 3. **第三方类型不穿透**：第三方库或插件的类型与异常不得出现在契约包公开接口、伞包导出面或未标明测试用途的适配包公开入口中。
 4. **严格依赖方向与无环**：包间依赖必须符合 `tool/src/package_rules.dart` 允许表且禁止成环，新增或调整包依赖前必须先核对规则表。详见 `docs/architecture/packages.md`。
 5. **禁止全局可变单例（日志除外）**：能力一律通过构造器注入或 `hiflutter_riverpod` 组合根覆盖提供；仅 `HiLog.install` 允许作为一次性的全局日志入口（ADR-0005），安装后不可替换。
-6. **禁用已弃用的 `package:flutter/material.dart`**：Flutter 包统一导入 `package:flutter/widgets.dart`；需要 Material 3 组件时，仅在允许依赖 `material_ui` 的 UI 包或示例 App 中导入 `package:material_ui/material_ui.dart`。
+6. **使用 `widgets.dart` 与 `material_ui`**：Flutter 代码导入 `package:flutter/widgets.dart`，Material 3 组件导入 `package:material_ui/material_ui.dart`；工作区全成员的 `package:flutter/material.dart` 导入/导出已由 `dart run tool/check.dart` 的 `deps` 阶段（`DepsStage`）自动拦截，细则见 `docs/engineering/coding.md`。
 7. **厂商 SDK 不预建**：友盟、Firebase、Sentry、EMAS 等商业厂商 SDK 暂不预建适配包，待具体消费项目需要时再新增独立适配包。
 8. **伞包不初始化**：伞包 `hiflutter` 只重新导出核心契约与默认非厂商适配包的自有公开 API，不得导出第三方类型或触发任何自动初始化。
 9. **未发布期轻量化演进**：`0.x` 对外正式发布前不保留向后兼容垫片或废弃别名；发生破坏性调整时，直接同步更新相关包及对应包 `CHANGELOG.md` 的迁移要点。
@@ -26,7 +26,7 @@
 - 任何代码或文档改动完成后，提交前必须运行总检查并确认全部阶段通过：
   - 常规改动：`dart run tool/check.dart`
   - 涉及示例 App `apps/showcase` 原生构建或宿主配置：`dart run tool/check.dart --build`
-- 所有新增与修改的功能按 TDD 实施，通过公开库入口编写外部行为测试；所有公开 API 须有英文 dartdoc。详见 `docs/engineering/coding.md`。
+- 新增与修改功能按 TDD 实施，公开 API 须有英文 dartdoc；成员包测试仅导入公开库入口（`deps` 阶段自动拦截直接导入 `src/`）。详见 `docs/engineering/coding.md`。
 
 ## 文档导航
 
