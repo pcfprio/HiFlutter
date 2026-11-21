@@ -126,9 +126,7 @@ final class HiFileLogSink implements HiLogSink {
     if (!directory.existsSync()) return [];
     return [
       for (final entity in directory.listSync())
-        if (entity is File)
-          if (_LogFileName.parse(entity.uri.pathSegments.last) case final name?)
-            name,
+        if (entity is File) ?_LogFileName.parse(entity.uri.pathSegments.last),
     ]..sort();
   }
 
