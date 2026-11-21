@@ -1,0 +1,10 @@
+arb-dir: lib/src/l10n
+template-arb-file: suite_en.arb
+output-dir: lib/src/l10n/generated
+output-localization-file: generated_suite_localizations.dart
+output-class: GeneratedSuiteLocalizations
+preferred-supported-locales:
+  - en
+  - zh
+nullable-getter: false
+format: true
