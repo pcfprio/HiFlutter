@@ -1,0 +1,35 @@
+name: hiflutter_core_device
+description: >-
+  device_info_plus and package_info_plus implementation of the HiFlutter
+  HiDeviceInfoSource contract, providing app metadata, device model, OS info,
+  and User-Agent building.
+version: 0.1.0
+repository: https://github.com/pcfprio/HiFlutter/tree/main/packages/hiflutter_core_device
+issue_tracker: https://github.com/pcfprio/HiFlutter/issues
+topics:
+  - device-info
+  - package-info
+  - user-agent
+  - utilities
+
+environment:
+  sdk: ^3.14.0
+  flutter: ">=3.50.0"
+
+resolution: workspace
+
+dependencies:
+  device_info_plus: ^13.3.0
+  flutter:
+    sdk: flutter
+  hiflutter_base: ^0.1.0
+  hiflutter_core: ^0.1.0
+  package_info_plus: ^10.2.2
+
+dev_dependencies:
+  device_info_plus_platform_interface: ^8.1.0
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+  package_info_plus_platform_interface: ^4.1.0
+  plugin_platform_interface: ^2.1.8
