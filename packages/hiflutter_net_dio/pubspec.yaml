@@ -1,0 +1,27 @@
+name: hiflutter_net_dio
+description: >-
+  Dio transport adapter for the HiFlutter networking contract: maps HiRequest
+  and HiResponse without exposing dio types, and normalizes DioExceptions to
+  HiError.
+version: 0.1.0
+repository: https://github.com/pcfprio/HiFlutter/tree/main/packages/hiflutter_net_dio
+issue_tracker: https://github.com/pcfprio/HiFlutter/issues
+topics:
+  - http
+  - network
+  - dio
+  - adapter
+
+environment:
+  sdk: ^3.14.0
+
+resolution: workspace
+
+dependencies:
+  dio: ^5.11.1
+  hiflutter_base: ^0.1.0
+  hiflutter_net: ^0.1.0
+
+dev_dependencies:
+  lints: ^6.1.0
+  test: ^1.26.0
