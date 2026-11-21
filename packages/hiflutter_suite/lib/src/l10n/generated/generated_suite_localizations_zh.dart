@@ -77,4 +77,16 @@ class GeneratedSuiteLocalizationsZh extends GeneratedSuiteLocalizations {
 
   @override
   String get errorGenericMessage => '发生意外错误，请重试。';
+
+  @override
+  String get confirmLabel => '确定';
+
+  @override
+  String get cancelLabel => '取消';
+
+  @override
+  String get searchHint => '搜索';
+
+  @override
+  String get clearLabel => '清除';
 }

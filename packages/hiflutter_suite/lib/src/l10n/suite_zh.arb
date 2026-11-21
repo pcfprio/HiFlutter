@@ -22,5 +22,9 @@
   "errorDataTitle": "数据解析失败",
   "errorDataMessage": "无法读取返回的数据格式。",
   "errorGenericTitle": "加载失败",
-  "errorGenericMessage": "发生意外错误，请重试。"
+  "errorGenericMessage": "发生意外错误，请重试。",
+  "confirmLabel": "确定",
+  "cancelLabel": "取消",
+  "searchHint": "搜索",
+  "clearLabel": "清除"
 }

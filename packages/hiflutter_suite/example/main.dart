@@ -13,20 +13,23 @@ class _SuiteExampleApp extends StatelessWidget {
     return MaterialApp(
       supportedLocales: HiSuiteLocalizations.supportedLocales,
       localizationsDelegates: HiSuiteLocalizations.localizationsDelegates,
-      home: const _PaginatedExamplePage(),
+      home: const _SuiteShowcasePage(),
     );
   }
 }
 
-class _PaginatedExamplePage extends StatefulWidget {
-  const _PaginatedExamplePage();
+class _SuiteShowcasePage extends StatefulWidget {
+  const _SuiteShowcasePage();
 
   @override
-  State<_PaginatedExamplePage> createState() => _PaginatedExamplePageState();
+  State<_SuiteShowcasePage> createState() => _SuiteShowcasePageState();
 }
 
-class _PaginatedExamplePageState extends State<_PaginatedExamplePage> {
+class _SuiteShowcasePageState extends State<_SuiteShowcasePage> {
+  final TextEditingController _searchController = TextEditingController();
   late final HiPaginationController<String> _controller;
+  String _selectedOption = 'All';
+  bool _submitting = false;
 
   @override
   void initState() {
@@ -44,22 +47,82 @@ class _PaginatedExamplePageState extends State<_PaginatedExamplePage> {
 
   @override
   void dispose() {
+    _searchController.dispose();
     _controller.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleClearFilter() async {
+    final confirmed = await HiConfirmDialog.show(
+      context,
+      title: 'Reset filter?',
+      message: 'Clear the active search text and restore default selection.',
+      isDestructive: true,
+    );
+    if (!confirmed || !mounted) return;
+    setState(() {
+      _submitting = true;
+      _searchController.clear();
+      _selectedOption = 'All';
+    });
+    await _controller.refresh();
+    if (!mounted) return;
+    setState(() => _submitting = false);
+    HiToast.show(context, 'Filters cleared');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('HiFlutter Suite Example')),
-      body: HiPaginatedListView<String>(
-        controller: _controller,
-        itemBuilder: (context, item, index) => ConstrainedBox(
-          constraints: const BoxConstraints(
-            minHeight: HiSuiteMetrics.listRowMinHeight,
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(HiSuiteMetrics.horizontalSafeMargin),
+            child: HiSearchField(
+              controller: _searchController,
+              onSubmitted: (query) =>
+                  HiToast.show(context, 'Searching: $query'),
+            ),
           ),
-          child: ListTile(title: Text(item)),
-        ),
+          HiListSection(
+            header: const Text('Scope'),
+            margin: const EdgeInsets.symmetric(
+              horizontal: HiSuiteMetrics.horizontalSafeMargin,
+            ),
+            children: [
+              HiSelectableListRow(
+                title: const Text('All'),
+                selected: _selectedOption == 'All',
+                onTap: () => setState(() => _selectedOption = 'All'),
+              ),
+              HiSelectableListRow(
+                title: const Text('Favorites'),
+                selected: _selectedOption == 'Favorites',
+                onTap: () => setState(() => _selectedOption = 'Favorites'),
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.all(HiSuiteMetrics.horizontalSafeMargin),
+            child: HiPrimaryButton(
+              label: 'Reset Filters',
+              shape: HiButtonShape.capsule,
+              loading: _submitting,
+              onPressed: _handleClearFilter,
+            ),
+          ),
+          Expanded(
+            child: HiPaginatedListView<String>(
+              controller: _controller,
+              itemBuilder: (context, item, index) => HiListRow(
+                title: Text(item),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => HiToast.show(context, 'Tapped $item'),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

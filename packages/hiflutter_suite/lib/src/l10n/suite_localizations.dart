@@ -228,6 +228,18 @@ class HiSuiteLocalizations {
   /// Default description for [HiErrorDisplay.generic].
   String get errorGenericMessage => _generated.errorGenericMessage;
 
+  /// Default confirm button label shown by `HiConfirmDialog`.
+  String get confirmLabel => _generated.confirmLabel;
+
+  /// Default cancel button label shown by `HiConfirmDialog`.
+  String get cancelLabel => _generated.cancelLabel;
+
+  /// Default placeholder text shown by `HiSearchField`.
+  String get searchHint => _generated.searchHint;
+
+  /// Semantic accessibility label for the clear button inside `HiSearchField`.
+  String get clearLabel => _generated.clearLabel;
+
   /// Maps [error] into a localized [HiErrorMessage] according to its
   /// [HiError.display] category.
   ///
