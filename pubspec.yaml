@@ -8,6 +8,7 @@ environment:
 workspace:
   - packages/hiflutter_base
   - packages/hiflutter_core
+  - packages/hiflutter_core_device
   - packages/hiflutter_nav
   - packages/hiflutter_nav_go_router
   - packages/hiflutter_nav_url_launcher
