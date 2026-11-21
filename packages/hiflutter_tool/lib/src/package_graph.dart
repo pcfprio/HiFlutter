@@ -143,8 +143,7 @@ HiRepoPackage? _tryReadPackage(
 
   final name = parsed['name']?.toString();
   if (name == null || !isHiFlutterPackageName(name)) return null;
-  if (parsed['publish_to']?.toString() == 'none' &&
-      parsed.containsKey('workspace')) {
+  if (parsed['publish_to']?.toString() == 'none') {
     return null;
   }
 

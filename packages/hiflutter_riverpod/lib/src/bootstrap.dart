@@ -57,15 +57,20 @@ abstract final class HiRiverpodBootstrap {
         if (beforeRunApp != null) {
           await beforeRunApp();
         }
-        final scope = ProviderScope(
+        // Nest caller overrides inside a child ProviderScope so callers passing
+        // a full `hiProviderOverrides(...)` list never trigger Riverpod's
+        // duplicate-override assertion inside a single scope, while preserving
+        // caller overrides precedence.
+        final defaultScope = ProviderScope(
           overrides: [
             hiLoggerProvider.overrideWithValue(logger),
             hiCrashReporterProvider.overrideWithValue(reporter),
-            ...overrides,
           ],
-          child: child,
+          child: overrides.isEmpty
+              ? child
+              : ProviderScope(overrides: overrides, child: child),
         );
-        (runAppCallback ?? runApp)(scope);
+        (runAppCallback ?? runApp)(defaultScope);
       } finally {
         if (!done.isCompleted) {
           done.complete();

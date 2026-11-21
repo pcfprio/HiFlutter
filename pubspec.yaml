@@ -6,6 +6,8 @@ environment:
   sdk: ^3.14.0
 
 workspace:
+  - apps/showcase
+  - packages/hiflutter
   - packages/hiflutter_base
   - packages/hiflutter_base_log_file
   - packages/hiflutter_core

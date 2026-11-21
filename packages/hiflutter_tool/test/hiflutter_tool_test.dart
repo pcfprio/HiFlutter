@@ -104,6 +104,20 @@ void main() {
       );
     });
 
+    test('ignores non-publishable showcase apps when scanning repo', () async {
+      ws.writeConsumerPubspec(dependencies: {'hiflutter_showcase': '^0.1.0'});
+
+      final result = await ws.run([
+        'mode',
+        'source',
+        '--project-dir',
+        ws.consumerDir,
+      ]);
+
+      expect(result.exitCode, isNot(0), reason: result.debugSummary);
+      expect(result.stderr, contains('hiflutter_showcase'));
+    });
+
     test(
       'resolves HiFlutter dir with precedence: flag > env > sibling',
       () async {
@@ -892,6 +906,20 @@ workspace:
     );
     writePkg('hiflutter_store', deps: {'hiflutter_base': '^1.0.0'});
     writePkg('hiflutter_dev_only');
+
+    // Non-publishable showcase app sharing the workspace must be ignored by catalog scans.
+    final showcaseDir = p.join(repoDir, 'apps', 'showcase');
+    Directory(p.join(showcaseDir, 'lib')).createSync(recursive: true);
+    File(p.join(showcaseDir, 'pubspec.yaml')).writeAsStringSync('''
+name: hiflutter_showcase
+publish_to: none
+version: 0.1.0+1
+environment:
+  sdk: ^3.14.0
+resolution: workspace
+''');
+    File(p.join(showcaseDir, 'lib', 'main.dart'))
+        .writeAsStringSync('void main() {}\n');
   }
 
   static Future<String> _git(String dir, List<String> args) async {
