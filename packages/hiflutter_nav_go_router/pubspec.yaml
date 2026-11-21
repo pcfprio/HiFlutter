@@ -1,0 +1,29 @@
+name: hiflutter_nav_go_router
+description: >-
+  go_router implementation of the HiFlutter navigation contract: generates
+  the router configuration from a HiRouteTable and guards deep links.
+version: 0.1.0
+repository: https://github.com/pcfprio/HiFlutter/tree/main/packages/hiflutter_nav_go_router
+issue_tracker: https://github.com/pcfprio/HiFlutter/issues
+topics:
+  - navigation
+  - router
+  - go-router
+  - deep-linking
+
+environment:
+  sdk: ^3.14.0
+  flutter: ">=3.50.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  go_router: ^18.1.4
+  hiflutter_nav: ^0.1.0
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
