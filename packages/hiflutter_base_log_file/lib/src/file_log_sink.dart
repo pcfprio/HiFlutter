@@ -86,7 +86,9 @@ final class HiFileLogSink implements HiLogSink {
         DateTime(now.year, now.month, now.day - (retentionDays - 1)),
       );
       final names = _names();
-      for (final expired in names.where((name) => name.day.compareTo(oldest) < 0)) {
+      for (final expired in names.where(
+        (name) => name.day.compareTo(oldest) < 0,
+      )) {
         _delete(expired);
       }
       // Continue the latest part of the day, e.g. after an app restart.
@@ -188,7 +190,9 @@ final class _LogFileName implements Comparable<_LogFileName> {
   /// Zero-based part number within [day].
   final int part;
 
-  static final _pattern = RegExp(r'^hiflutter-(\d{4}-\d\d-\d\d)(?:\.(\d+))?\.log$');
+  static final _pattern = RegExp(
+    r'^hiflutter-(\d{4}-\d\d-\d\d)(?:\.(\d+))?\.log$',
+  );
 
   static _LogFileName? parse(String name) {
     final match = _pattern.firstMatch(name);

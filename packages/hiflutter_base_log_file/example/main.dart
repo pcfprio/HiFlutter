@@ -23,7 +23,8 @@ Future<void> main() async {
   );
 
   HiLog.info(
-    () => 'GET /v1/me?access_token=abc123', // Written as access_token=[REDACTED].
+    () =>
+        'GET /v1/me?access_token=abc123', // Written as access_token=[REDACTED].
     module: 'net',
     attributes: {'status': 200},
   );

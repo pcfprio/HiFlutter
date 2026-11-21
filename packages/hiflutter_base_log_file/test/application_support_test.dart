@@ -26,17 +26,20 @@ void main() {
 
   tearDown(() => dir.deleteSync(recursive: true));
 
-  test('writes into a logs folder of the application support directory', () async {
-    final sink = await HiFileLogSink.inApplicationSupport(
-      now: () => DateTime(2026, 11, 21),
-    );
-    HiLogger([HiLogRoute(sink)]).info(() => 'hello');
-    sink.close();
+  test(
+    'writes into a logs folder of the application support directory',
+    () async {
+      final sink = await HiFileLogSink.inApplicationSupport(
+        now: () => DateTime(2026, 11, 21),
+      );
+      HiLogger([HiLogRoute(sink)]).info(() => 'hello');
+      sink.close();
 
-    final files = await sink.logFiles();
-    expect(files.single.path, '${dir.path}/logs/hiflutter-2026-11-21.log');
-    expect(files.single.readAsStringSync(), contains('INFO hello'));
-  });
+      final files = await sink.logFiles();
+      expect(files.single.path, '${dir.path}/logs/hiflutter-2026-11-21.log');
+      expect(files.single.readAsStringSync(), contains('INFO hello'));
+    },
+  );
 
   test('passes the folder name and limits through', () async {
     final sink = await HiFileLogSink.inApplicationSupport(

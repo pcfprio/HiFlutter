@@ -49,24 +49,27 @@ void main() {
     );
   });
 
-  test('writes the redacted error and the stack trace below the line', () async {
-    final sink = sinkIn(dir);
-    loggerFor(sink).error(
-      () => 'upload failed',
-      error: StateError('Bearer secret123 rejected'),
-      stackTrace: StackTrace.fromString('#0 main (file.dart:1)\n#1 run'),
-    );
-    sink.close();
+  test(
+    'writes the redacted error and the stack trace below the line',
+    () async {
+      final sink = sinkIn(dir);
+      loggerFor(sink).error(
+        () => 'upload failed',
+        error: StateError('Bearer secret123 rejected'),
+        stackTrace: StackTrace.fromString('#0 main (file.dart:1)\n#1 run'),
+      );
+      sink.close();
 
-    final lines = (await sink.logFiles()).single.readAsLinesSync();
-    expect(lines, hasLength(4));
-    expect(lines[0], endsWith(' ERROR upload failed'));
-    expect(lines.skip(1), [
-      '  Bad state: Bearer [REDACTED] rejected',
-      '  #0 main (file.dart:1)',
-      '  #1 run',
-    ]);
-  });
+      final lines = (await sink.logFiles()).single.readAsLinesSync();
+      expect(lines, hasLength(4));
+      expect(lines[0], endsWith(' ERROR upload failed'));
+      expect(lines.skip(1), [
+        '  Bad state: Bearer [REDACTED] rejected',
+        '  #0 main (file.dart:1)',
+        '  #1 run',
+      ]);
+    },
+  );
 
   test('starts a new file when the day changes', () async {
     final sink = sinkIn(dir);
@@ -195,19 +198,22 @@ void main() {
     expect(names(await sink.logFiles()), ['hiflutter-2026-11-21.log']);
   });
 
-  test('writes a record larger than the limit into a part of its own', () async {
-    final sink = HiFileLogSink(dir, maxFileBytes: 50, now: () => now);
-    final logger = loggerFor(sink);
-    logger.info(() => 'a' * 80);
-    logger.info(() => 'b' * 80);
-    sink.close();
+  test(
+    'writes a record larger than the limit into a part of its own',
+    () async {
+      final sink = HiFileLogSink(dir, maxFileBytes: 50, now: () => now);
+      final logger = loggerFor(sink);
+      logger.info(() => 'a' * 80);
+      logger.info(() => 'b' * 80);
+      sink.close();
 
-    final files = await sink.logFiles();
-    expect(names(files), [
-      'hiflutter-2026-11-21.log',
-      'hiflutter-2026-11-21.1.log',
-    ]);
-    expect(files[0].readAsStringSync(), contains('a' * 80));
-    expect(files[1].readAsStringSync(), contains('b' * 80));
-  });
+      final files = await sink.logFiles();
+      expect(names(files), [
+        'hiflutter-2026-11-21.log',
+        'hiflutter-2026-11-21.1.log',
+      ]);
+      expect(files[0].readAsStringSync(), contains('a' * 80));
+      expect(files[1].readAsStringSync(), contains('b' * 80));
+    },
+  );
 }
