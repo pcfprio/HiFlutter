@@ -236,6 +236,18 @@ class _HiPaginatedListViewState<T> extends State<HiPaginatedListView<T>> {
     );
   }
 
+  Widget _buildEmptyState(BuildContext context) {
+    final emptyContent =
+        widget.emptyBuilder?.call(context) ??
+        widget.emptyView ??
+        HiEmptyView(
+          title: widget.emptyTitle,
+          message: widget.emptyMessage,
+          icon: widget.emptyIcon,
+        );
+    return _wrapPullToRefreshState(emptyContent);
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -255,6 +267,10 @@ class _HiPaginatedListViewState<T> extends State<HiPaginatedListView<T>> {
           final error = controller.error;
           if (controller.status == HiPaginationStatus.failure &&
               error != null) {
+            if (widget.errorBuilder == null &&
+                error.display == HiErrorDisplay.none) {
+              return _buildEmptyState(context);
+            }
             final errorContent =
                 widget.errorBuilder?.call(context, error, controller.retry) ??
                 HiErrorView(
@@ -266,15 +282,7 @@ class _HiPaginatedListViewState<T> extends State<HiPaginatedListView<T>> {
                 );
             return _wrapPullToRefreshState(errorContent);
           }
-          final emptyContent =
-              widget.emptyBuilder?.call(context) ??
-              widget.emptyView ??
-              HiEmptyView(
-                title: widget.emptyTitle,
-                message: widget.emptyMessage,
-                icon: widget.emptyIcon,
-              );
-          return _wrapPullToRefreshState(emptyContent);
+          return _buildEmptyState(context);
         }
 
         final footerStatus = _footerStatus(controller);

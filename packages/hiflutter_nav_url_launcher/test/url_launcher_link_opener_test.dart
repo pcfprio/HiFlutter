@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hiflutter_base/hiflutter_base.dart';
 import 'package:hiflutter_nav/hiflutter_nav.dart';
 import 'package:hiflutter_nav_url_launcher/hiflutter_nav_url_launcher.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
@@ -12,14 +13,17 @@ class FakeUrlLauncher extends UrlLauncherPlatform
   FakeUrlLauncher({this.openable = const {}, this.failure});
 
   final Set<String> openable;
-  final Exception? failure;
+  final Object? failure;
   final launches = <(String, PreferredLaunchMode)>[];
 
   @override
   LinkDelegate? get linkDelegate => null;
 
   @override
-  Future<bool> canLaunch(String url) async => openable.contains(url);
+  Future<bool> canLaunch(String url) async {
+    if (failure case final failure?) throw failure;
+    return openable.contains(url);
+  }
 
   @override
   Future<bool> launchUrl(String url, LaunchOptions options) async {
@@ -62,10 +66,36 @@ void main() {
     expect(await opener.open(Uri.parse('mailto:a@example.com')), isFalse);
   });
 
-  test('open completes with the platform failure', () async {
+  test('open and canOpen normalize platform failures into HiError', () async {
     UrlLauncherPlatform.instance = FakeUrlLauncher(
       failure: PlatformException(code: 'ACTIVITY_NOT_FOUND'),
     );
-    expect(opener.open(Uri.parse(page)), throwsA(isA<PlatformException>()));
+    await expectLater(
+      opener.open(Uri.parse(page)),
+      throwsA(
+        isA<HiUnknownError>().having(
+          (e) => e.diagnostics,
+          'diagnostics',
+          contains('ACTIVITY_NOT_FOUND'),
+        ),
+      ),
+    );
+    await expectLater(
+      opener.canOpen(Uri.parse(page)),
+      throwsA(isA<HiUnknownError>()),
+    );
+  });
+
+  test('open preserves ArgumentError for invalid arguments', () async {
+    UrlLauncherPlatform.instance = FakeUrlLauncher(
+      failure: ArgumentError('Only http/https supported'),
+    );
+    await expectLater(
+      opener.open(
+        Uri.parse('mailto:a@example.com'),
+        mode: HiLinkMode.inAppBrowser,
+      ),
+      throwsA(isA<ArgumentError>()),
+    );
   });
 }

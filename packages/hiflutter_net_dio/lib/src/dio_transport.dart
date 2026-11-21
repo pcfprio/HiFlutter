@@ -157,10 +157,12 @@ final class HiDioTransport implements HiTransport {
         ),
         DioExceptionType.badResponse ||
         DioExceptionType.unknown ||
-        DioExceptionType.transformTimeout =>
-          error.error is HiError
-              ? error.error! as HiError
-              : HiError.from(error, stackTrace),
+        DioExceptionType.transformTimeout => switch (error.error) {
+          final HiError hiError => hiError,
+          final Object cause when error.type == DioExceptionType.unknown =>
+            HiError.from(cause, stackTrace),
+          _ => HiError.from(error, stackTrace),
+        },
       };
     }
     return HiError.from(error, stackTrace);

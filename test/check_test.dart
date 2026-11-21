@@ -153,6 +153,37 @@ void main() {
         expect(run.exitCode, isNot(0), reason: '$run');
         expect(run.output, contains('CHANGELOG'));
       });
+
+      test(
+        'fails when an unpublished member drifts from ^version constraint',
+        () async {
+          repo = await FixtureRepo.create(packages: ['hiflutter_base']);
+          repo.write('pubspec.yaml', '''
+name: fixture_workspace
+publish_to: none
+environment:
+  sdk: ^3.14.0
+workspace:
+  - apps/showcase
+  - packages/hiflutter_base
+''');
+          repo.write('apps/showcase/pubspec.yaml', '''
+name: hiflutter_showcase
+publish_to: none
+version: 0.1.0+1
+environment:
+  sdk: ^3.14.0
+resolution: workspace
+dependencies:
+  hiflutter_base: ^0.0.9
+''');
+
+          final run = await repo.check(['--only', 'versions']);
+
+          expect(run.exitCode, isNot(0), reason: '$run');
+          expect(run.output, contains('hiflutter_showcase -> hiflutter_base'));
+        },
+      );
     });
 
     group('deps stage', () {

@@ -155,7 +155,21 @@ class _HiWebViewPageState extends State<HiWebViewPage> {
   void _handoffExternalLink(Uri uri) {
     final opener = widget.linkOpener;
     if (opener == null) return;
-    unawaited(opener.open(uri).then((_) {}, onError: (Object _) {}));
+    unawaited(
+      opener
+          .open(uri)
+          .then(
+            (_) {},
+            onError: (Object error, StackTrace stackTrace) {
+              HiLog.warning(
+                () => 'Failed to open external link $uri',
+                module: 'webview',
+                error: error,
+                stackTrace: stackTrace,
+              );
+            },
+          ),
+    );
   }
 
   void _handlePageStarted(String url) {
@@ -210,8 +224,13 @@ class _HiWebViewPageState extends State<HiWebViewPage> {
           _pageTitle = normalized;
         });
       }
-    } catch (_) {
-      // Ignore platform title read failures during page transitions.
+    } catch (error, stackTrace) {
+      HiLog.debug(
+        () => 'Failed to read web page title',
+        module: 'webview',
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
   }
 

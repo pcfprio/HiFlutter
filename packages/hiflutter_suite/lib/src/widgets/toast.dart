@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/scheduler.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../metrics/suite_metrics.dart';
@@ -58,12 +59,22 @@ final class HiToastHandle {
     _timer?.cancel();
     _timer = null;
     _isShown = false;
-    if (!_removed && !_overlay.mounted) {
-      _removed = true;
-      _entry.remove();
-      if (!_disposed) {
+    if (!_removed) {
+      if (!_overlay.mounted) {
+        // The parent OverlayState is tearing down and disposes its own subtree.
+        _removed = true;
         _disposed = true;
-        _entry.dispose();
+      } else {
+        SchedulerBinding.instance.addPostFrameCallback((_) {
+          if (!_removed && _overlay.mounted) {
+            _removed = true;
+            _entry.remove();
+          }
+          if (!_disposed && _removed) {
+            _disposed = true;
+            _entry.dispose();
+          }
+        });
       }
     }
     _onDismissed();

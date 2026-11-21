@@ -81,7 +81,7 @@ hiflutter check [--release] [--project-dir|-p <dir>] [--hiflutter-dir <dir>]
 | --- | --- | --- |
 | `hosted` | 报告 `Mode: hosted` 并返回 `0` | 同左，返回 `0` |
 | `source` | 报告 `Mode: source` 及关联 HiFlutter 工作区 Git 状态（`clean` / `dirty`），返回 `0` | **以退出码 `1` 失败**，阻止把未发版源码打包发往商店或外部环境 |
-| `pin` | 核对远端/目标仓库 `<tag>` 解析出的真实提交 SHA，与消费项目 `pubspec.lock` 中所有托管包的 `resolved-ref`、`url` 和 `source: git` 逐一比对；不一致时返回非零退出码 | 同左，严格校验全匹配后才返回 `0` |
+| `pin` | 核对远端/目标仓库 `<tag>` 解析出的真实提交 SHA，与消费项目 `pubspec.lock` 中所有托管包的 `source: git` 与 `resolved-ref` 逐一比对；不一致时返回非零退出码 | 同左，严格校验全匹配后才返回 `0` |
 
 > 使用 `hiflutter mode source` 或 `hiflutter mode pin <tag>` 切换模式后，必须紧接着运行 `flutter pub get`（或 `dart pub get`）刷新 `pubspec.lock`，再执行 `hiflutter check`。
 

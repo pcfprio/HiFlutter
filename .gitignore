@@ -19,6 +19,3 @@ doc/api/
 # Agent tooling
 .claude/worktrees/
 .claude/settings.local.json
-
-# Claude Code local worktrees
-.claude/worktrees/

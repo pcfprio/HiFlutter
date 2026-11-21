@@ -1,4 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hiflutter/hiflutter.dart';
 import 'package:hiflutter_riverpod/hiflutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
@@ -18,28 +17,30 @@ Future<void> main() async {
     HiLogRoute(logSink, minLevel: HiLogLevel.info),
     HiLogRoute(deferredFileSink, minLevel: HiLogLevel.info),
   ]);
+  final consent = HiConsent();
+  final crashReporter = HiConsentGatedCrashReporter(
+    const HiNoOpCrashReporter(),
+    consent: consent,
+  );
 
   late ShowcaseDependencies deps;
   late HiGoRouterNavigator navigator;
 
   await HiRiverpodBootstrap.run(
     logger: logger,
-    reporter: const HiNoOpCrashReporter(),
+    reporter: crashReporter,
     beforeRunApp: () async {
       deps = await ShowcaseDependencies.live(
         logger: logger,
         logSink: logSink,
         fileSinkTarget: deferredFileSink,
+        consent: consent,
+        crashReporter: crashReporter,
       );
       navigator = createShowcaseNavigator(deps);
     },
-    runAppCallback: (_) => runApp(
-      ProviderScope(
-        overrides: deps.toOverrides(navigator: navigator),
-        child: ShowcaseApp(navigator: navigator),
-      ),
-    ),
-    child: const SizedBox.shrink(),
+    overridesBuilder: () => deps.toOverrides(navigator: navigator),
+    builder: () => ShowcaseApp(navigator: navigator),
   );
 }
 

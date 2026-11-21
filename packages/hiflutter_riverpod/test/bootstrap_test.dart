@@ -216,5 +216,57 @@ void main() {
         expect(observedReporter, same(overrideReporter));
       },
     );
+
+    testWidgets(
+      'evaluates overridesBuilder and builder after beforeRunApp completes',
+      (tester) async {
+        final steps = <String>[];
+        late HiKeyValueStore asyncStore;
+        late HiKeyValueStore readStore;
+        Widget? mountedApp;
+
+        final capture = await HiRiverpodBootstrap.run(
+          logger: HiLogger(const []),
+          reporter: const HiNoOpCrashReporter(),
+          installLogger: (_) {},
+          beforeRunApp: () async {
+            asyncStore = HiKeyValueStore.memory();
+            await asyncStore.setString('k', 'ready');
+            steps.add('1:beforeRunApp');
+          },
+          overridesBuilder: () {
+            steps.add('2:overridesBuilder');
+            return [hiKeyValueStoreProvider.overrideWithValue(asyncStore)];
+          },
+          builder: () {
+            steps.add('3:builder');
+            return Directionality(
+              textDirection: TextDirection.ltr,
+              child: Consumer(
+                builder: (context, ref, _) {
+                  readStore = ref.watch(hiKeyValueStoreProvider);
+                  return const Text('deferred');
+                },
+              ),
+            );
+          },
+          runAppCallback: (app) {
+            steps.add('4:runApp');
+            mountedApp = app;
+          },
+        );
+        addTearDown(capture.dispose);
+
+        expect(steps, [
+          '1:beforeRunApp',
+          '2:overridesBuilder',
+          '3:builder',
+          '4:runApp',
+        ]);
+        await tester.pumpWidget(mountedApp!);
+        expect(find.text('deferred'), findsOneWidget);
+        expect(readStore, same(asyncStore));
+      },
+    );
   });
 }

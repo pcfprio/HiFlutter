@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hiflutter_base/hiflutter_base.dart';
 import 'package:hiflutter_core/hiflutter_core.dart';
 import 'package:hiflutter_core_device/hiflutter_core_device.dart';
-import 'package:hiflutter_core_device/src/device_info_mapper.dart';
+import 'package:hiflutter_core_device/testing.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:package_info_plus_platform_interface/package_info_data.dart';
 import 'package:package_info_plus_platform_interface/package_info_platform_interface.dart';
@@ -183,97 +183,113 @@ void main() {
     });
   });
 
-  group('mapPlatformDeviceInfo', () {
-    final pkg = PackageInfo(
-      appName: 'Demo',
-      packageName: 'com.example.demo',
-      version: '1.2.3',
-      buildNumber: '45',
+  group('platform device mapping through hiDeviceInfoSourceWithLoader', () {
+    final mappedSource = hiDeviceInfoSourceWithLoader(
+      () => DeviceInfoPlatform.instance.deviceInfo(),
     );
 
-    test('extracts AndroidDeviceInfo model and version', () {
-      final android = AndroidDeviceInfo.setMockInitialValues(
-        version: AndroidBuildVersion.setMockInitialValues(
-          codename: 'REL',
-          incremental: '1',
-          previewSdkInt: 0,
-          release: '15',
-          sdkInt: 35,
+    void setDefaultPackage() {
+      PackageInfo.setMockInitialValues(
+        appName: 'Demo',
+        packageName: 'com.example.demo',
+        version: '1.2.3',
+        buildNumber: '45',
+        buildSignature: '',
+      );
+    }
+
+    test('extracts AndroidDeviceInfo model and version', () async {
+      setDefaultPackage();
+      DeviceInfoPlatform.instance = _FakeDeviceInfoPlatform(
+        info: AndroidDeviceInfo.setMockInitialValues(
+          version: AndroidBuildVersion.setMockInitialValues(
+            codename: 'REL',
+            incremental: '1',
+            previewSdkInt: 0,
+            release: '15',
+            sdkInt: 35,
+          ),
+          board: 'husky',
+          bootloader: 'rip',
+          brand: 'google',
+          device: 'husky',
+          display: 'AP3A',
+          fingerprint: 'fp',
+          hardware: 'husky',
+          host: 'host',
+          id: 'AP3A',
+          manufacturer: 'Google',
+          model: 'Pixel 9 Pro',
+          product: 'husky',
+          name: 'Pixel 9 Pro',
+          supported32BitAbis: const [],
+          supported64BitAbis: const ['arm64-v8a'],
+          supportedAbis: const ['arm64-v8a'],
+          tags: 'release-keys',
+          time: 0,
+          type: 'user',
+          isPhysicalDevice: true,
+          freeDiskSize: 1000,
+          totalDiskSize: 2000,
+          systemFeatures: const [],
+          isLowRamDevice: false,
+          physicalRamSize: 12288,
+          availableRamSize: 6144,
         ),
-        board: 'husky',
-        bootloader: 'rip',
-        brand: 'google',
-        device: 'husky',
-        display: 'AP3A',
-        fingerprint: 'fp',
-        hardware: 'husky',
-        host: 'host',
-        id: 'AP3A',
-        manufacturer: 'Google',
-        model: 'Pixel 9 Pro',
-        product: 'husky',
-        name: 'Pixel 9 Pro',
-        supported32BitAbis: const [],
-        supported64BitAbis: const ['arm64-v8a'],
-        supportedAbis: const ['arm64-v8a'],
-        tags: 'release-keys',
-        time: 0,
-        type: 'user',
-        isPhysicalDevice: true,
-        freeDiskSize: 1000,
-        totalDiskSize: 2000,
-        systemFeatures: const [],
-        isLowRamDevice: false,
-        physicalRamSize: 12288,
-        availableRamSize: 6144,
       );
 
-      final result = mapPlatformDeviceInfo(pkg, android);
+      final result = await mappedSource.load();
       expect(result.deviceModel, 'Pixel 9 Pro');
       expect(result.osName, 'Android');
       expect(result.osVersion, '15');
       expect(result.toUserAgent(), 'Demo/1.2.3+45 (Android 15; Pixel 9 Pro)');
     });
 
-    test('extracts IosDeviceInfo modelName and systemVersion', () {
-      final ios = IosDeviceInfo.setMockInitialValues(
-        name: 'My iPhone',
-        systemName: 'iOS',
-        systemVersion: '18.1',
-        model: 'iPhone',
-        modelName: 'iPhone 16 Pro',
-        localizedModel: 'iPhone',
-        freeDiskSize: 1000,
-        totalDiskSize: 2000,
-        isPhysicalDevice: true,
-        isiOSAppOnMac: false,
-        isiOSAppOnVision: false,
-        physicalRamSize: 8192,
-        availableRamSize: 4096,
-        utsname: IosUtsname.setMockInitialValues(
-          sysname: 'Darwin',
-          nodename: 'localhost',
-          release: '24.1.0',
-          version: 'v1',
-          machine: 'iPhone17,1',
+    test('extracts IosDeviceInfo modelName and systemVersion', () async {
+      setDefaultPackage();
+      DeviceInfoPlatform.instance = _FakeDeviceInfoPlatform(
+        info: IosDeviceInfo.setMockInitialValues(
+          name: 'My iPhone',
+          systemName: 'iOS',
+          systemVersion: '18.1',
+          model: 'iPhone',
+          modelName: 'iPhone 16 Pro',
+          localizedModel: 'iPhone',
+          freeDiskSize: 1000,
+          totalDiskSize: 2000,
+          isPhysicalDevice: true,
+          isiOSAppOnMac: false,
+          isiOSAppOnVision: false,
+          physicalRamSize: 8192,
+          availableRamSize: 4096,
+          utsname: IosUtsname.setMockInitialValues(
+            sysname: 'Darwin',
+            nodename: 'localhost',
+            release: '24.1.0',
+            version: 'v1',
+            machine: 'iPhone17,1',
+          ),
         ),
       );
 
-      final result = mapPlatformDeviceInfo(pkg, ios);
+      final result = await mappedSource.load();
       expect(result.deviceModel, 'iPhone 16 Pro');
       expect(result.osName, 'iOS');
       expect(result.osVersion, '18.1');
       expect(result.toUserAgent(), 'Demo/1.2.3+45 (iOS 18.1; iPhone 16 Pro)');
     });
 
-    test('extracts generic BaseDeviceInfo.data fields', () {
-      final generic = BaseDeviceInfo({
-        'model': 'HarmonyDevice',
-        'osName': 'OpenHarmony',
-        'osVersion': '5.0',
-      });
+    test('extracts generic BaseDeviceInfo.data fields', () async {
+      setDefaultPackage();
+      DeviceInfoPlatform.instance = _FakeDeviceInfoPlatform(
+        info: BaseDeviceInfo({
+          'model': 'HarmonyDevice',
+          'osName': 'OpenHarmony',
+          'osVersion': '5.0',
+        }),
+      );
 
-      final result = mapPlatformDeviceInfo(pkg, generic);
+      final result = await mappedSource.load();
       expect(result.deviceModel, 'HarmonyDevice');
       expect(result.osName, 'OpenHarmony');
       expect(result.osVersion, '5.0');
@@ -283,103 +299,117 @@ void main() {
       );
     });
 
-    test('falls back cleanly when package or device fields are empty', () {
-      final emptyPkg = PackageInfo(
-        appName: '',
-        packageName: 'com.example.fallback',
-        version: '',
-        buildNumber: '',
-      );
-      final emptyDevice = BaseDeviceInfo({});
-
-      final result = mapPlatformDeviceInfo(emptyPkg, emptyDevice);
-      expect(result.appName, 'com.example.fallback');
-      expect(result.packageName, 'com.example.fallback');
-      expect(result.version, '0.0.0');
-      expect(result.buildNumber, '');
-      expect(result.deviceModel, 'unknown');
-      expect(result.osName, 'unknown');
-      expect(result.osVersion, 'unknown');
-      expect(
-        result.toUserAgent(),
-        'com.example.fallback/0.0.0 (unknown unknown; unknown)',
-      );
-    });
-
-    test('falls back on Android/iOS when optional subfields are blank', () {
-      final blankAndroid = AndroidDeviceInfo.setMockInitialValues(
-        version: AndroidBuildVersion.setMockInitialValues(
-          codename: 'REL',
-          incremental: '1',
-          previewSdkInt: 0,
-          release: '',
-          sdkInt: 34,
-        ),
-        board: '',
-        bootloader: '',
-        brand: '',
-        device: 'emulator',
-        display: '',
-        fingerprint: '',
-        hardware: '',
-        host: '',
-        id: '',
-        manufacturer: '',
-        model: '',
-        product: '',
-        name: '',
-        supported32BitAbis: const [],
-        supported64BitAbis: const [],
-        supportedAbis: const [],
-        tags: '',
-        time: 0,
-        type: '',
-        isPhysicalDevice: false,
-        freeDiskSize: 0,
-        totalDiskSize: 0,
-        systemFeatures: const [],
-        isLowRamDevice: false,
-        physicalRamSize: 0,
-        availableRamSize: 0,
-      );
-
-      final result = mapPlatformDeviceInfo(pkg, blankAndroid);
-      expect(result.deviceModel, 'emulator');
-      expect(result.osName, 'Android');
-      expect(result.osVersion, 'API 34');
-
-      final blankIos = IosDeviceInfo.setMockInitialValues(
-        name: '',
-        systemName: '',
-        systemVersion: '',
-        model: '',
-        modelName: '',
-        localizedModel: '',
-        freeDiskSize: 0,
-        totalDiskSize: 0,
-        isPhysicalDevice: false,
-        isiOSAppOnMac: false,
-        isiOSAppOnVision: false,
-        physicalRamSize: 0,
-        availableRamSize: 0,
-        utsname: IosUtsname.setMockInitialValues(
-          sysname: '',
-          nodename: '',
-          release: '',
+    test(
+      'falls back cleanly when package or device fields are empty',
+      () async {
+        PackageInfo.setMockInitialValues(
+          appName: '',
+          packageName: 'com.example.fallback',
           version: '',
-          machine: 'arm64',
-        ),
-      );
-      final iosFallback = mapPlatformDeviceInfo(pkg, blankIos);
-      expect(iosFallback.deviceModel, 'arm64');
-      expect(iosFallback.osName, 'iOS');
-      expect(iosFallback.osVersion, 'unknown');
-    });
+          buildNumber: '',
+          buildSignature: '',
+        );
+        DeviceInfoPlatform.instance = _FakeDeviceInfoPlatform(
+          info: BaseDeviceInfo({}),
+        );
 
-    test('extracts desktop, web, and nested map version fields', () {
-      final mac = mapPlatformDeviceInfo(
-        pkg,
-        MacOsDeviceInfo.setMockInitialValues(
+        final result = await mappedSource.load();
+        expect(result.appName, 'com.example.fallback');
+        expect(result.packageName, 'com.example.fallback');
+        expect(result.version, '0.0.0');
+        expect(result.buildNumber, '');
+        expect(result.deviceModel, 'unknown');
+        expect(result.osName, 'unknown');
+        expect(result.osVersion, 'unknown');
+        expect(
+          result.toUserAgent(),
+          'com.example.fallback/0.0.0 (unknown unknown; unknown)',
+        );
+      },
+    );
+
+    test(
+      'falls back on Android/iOS when optional subfields are blank',
+      () async {
+        setDefaultPackage();
+        DeviceInfoPlatform.instance = _FakeDeviceInfoPlatform(
+          info: AndroidDeviceInfo.setMockInitialValues(
+            version: AndroidBuildVersion.setMockInitialValues(
+              codename: 'REL',
+              incremental: '1',
+              previewSdkInt: 0,
+              release: '',
+              sdkInt: 34,
+            ),
+            board: '',
+            bootloader: '',
+            brand: '',
+            device: 'emulator',
+            display: '',
+            fingerprint: '',
+            hardware: '',
+            host: '',
+            id: '',
+            manufacturer: '',
+            model: '',
+            product: '',
+            name: '',
+            supported32BitAbis: const [],
+            supported64BitAbis: const [],
+            supportedAbis: const [],
+            tags: '',
+            time: 0,
+            type: '',
+            isPhysicalDevice: false,
+            freeDiskSize: 0,
+            totalDiskSize: 0,
+            systemFeatures: const [],
+            isLowRamDevice: false,
+            physicalRamSize: 0,
+            availableRamSize: 0,
+          ),
+        );
+
+        final result = await mappedSource.load();
+        expect(result.deviceModel, 'emulator');
+        expect(result.osName, 'Android');
+        expect(result.osVersion, 'API 34');
+
+        DeviceInfoPlatform.instance = _FakeDeviceInfoPlatform(
+          info: IosDeviceInfo.setMockInitialValues(
+            name: '',
+            systemName: '',
+            systemVersion: '',
+            model: '',
+            modelName: '',
+            localizedModel: '',
+            freeDiskSize: 0,
+            totalDiskSize: 0,
+            isPhysicalDevice: false,
+            isiOSAppOnMac: false,
+            isiOSAppOnVision: false,
+            physicalRamSize: 0,
+            availableRamSize: 0,
+            utsname: IosUtsname.setMockInitialValues(
+              sysname: '',
+              nodename: '',
+              release: '',
+              version: '',
+              machine: 'arm64',
+            ),
+          ),
+        );
+        final iosFallback = await mappedSource.load();
+        expect(iosFallback.deviceModel, 'arm64');
+        expect(iosFallback.osName, 'iOS');
+        expect(iosFallback.osVersion, 'unknown');
+      },
+    );
+
+    test('extracts desktop, web, and nested map version fields', () async {
+      setDefaultPackage();
+      DeviceInfoPlatform.instance = _FakeDeviceInfoPlatform(
+        info: MacOsDeviceInfo.setMockInitialValues(
           computerName: 'Mac',
           hostName: 'mac.local',
           arch: 'arm64',
@@ -396,13 +426,13 @@ void main() {
           systemGUID: 'id',
         ),
       );
+      final mac = await mappedSource.load();
       expect(mac.deviceModel, 'MacBook Pro');
       expect(mac.osName, 'macOS');
       expect(mac.osVersion, '15.2.1');
 
-      final linux = mapPlatformDeviceInfo(
-        pkg,
-        LinuxDeviceInfo(
+      DeviceInfoPlatform.instance = _FakeDeviceInfoPlatform(
+        info: LinuxDeviceInfo(
           name: 'Ubuntu',
           version: '24.04 LTS',
           id: 'ubuntu',
@@ -411,13 +441,13 @@ void main() {
           machineId: 'mid',
         ),
       );
+      final linux = await mappedSource.load();
       expect(linux.deviceModel, 'Ubuntu 24.04 LTS');
       expect(linux.osName, 'Ubuntu');
       expect(linux.osVersion, '24.04');
 
-      final web = mapPlatformDeviceInfo(
-        pkg,
-        WebBrowserInfo(
+      DeviceInfoPlatform.instance = _FakeDeviceInfoPlatform(
+        info: WebBrowserInfo(
           appCodeName: 'Mozilla',
           appName: 'Netscape',
           appVersion: '5.0',
@@ -434,18 +464,19 @@ void main() {
           hardwareConcurrency: 8,
         ),
       );
+      final web = await mappedSource.load();
       expect(web.deviceModel, 'chrome');
       expect(web.osName, 'Web');
       expect(web.osVersion, '5.0');
 
-      final nested = mapPlatformDeviceInfo(
-        pkg,
-        BaseDeviceInfo({
+      DeviceInfoPlatform.instance = _FakeDeviceInfoPlatform(
+        info: BaseDeviceInfo({
           'deviceModel': 'CustomBox',
           'platform': 'Embedded',
           'version': {'release': '3.1'},
         }),
       );
+      final nested = await mappedSource.load();
       expect(nested.deviceModel, 'CustomBox');
       expect(nested.osName, 'Embedded');
       expect(nested.osVersion, '3.1');

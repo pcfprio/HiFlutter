@@ -80,6 +80,11 @@ class HiLoadMoreFooter extends StatelessWidget {
           vertical: HiSuiteMetrics.loadMoreFooterVerticalPadding,
         );
 
+    final effectiveNoMoreLabel = noMoreLabel ?? l10n.loadMoreNoMoreLabel;
+    if (status == HiLoadMoreStatus.noMore && effectiveNoMoreLabel.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     final Widget content = switch (status) {
       HiLoadMoreStatus.loading => Row(
         mainAxisSize: MainAxisSize.min,
@@ -108,11 +113,7 @@ class HiLoadMoreFooter extends StatelessWidget {
                 canLoadMoreLabel ?? l10n.loadMorePromptLabel,
                 style: mutedStyle,
               ),
-      HiLoadMoreStatus.noMore => () {
-        final text = noMoreLabel ?? l10n.loadMoreNoMoreLabel;
-        if (text.isEmpty) return const SizedBox.shrink();
-        return Text(text, style: mutedStyle);
-      }(),
+      HiLoadMoreStatus.noMore => Text(effectiveNoMoreLabel, style: mutedStyle),
       HiLoadMoreStatus.failed => _FailedFooterContent(
         failedText: failedLabel ?? l10n.loadMoreFailedLabel,
         retryText: retryLabel ?? l10n.retryLabel,
@@ -125,11 +126,6 @@ class HiLoadMoreFooter extends StatelessWidget {
         padding: effectivePadding,
       ),
     };
-
-    if (status == HiLoadMoreStatus.noMore &&
-        (noMoreLabel ?? l10n.loadMoreNoMoreLabel).isEmpty) {
-      return const SizedBox.shrink();
-    }
 
     if (status == HiLoadMoreStatus.failed) {
       return ConstrainedBox(

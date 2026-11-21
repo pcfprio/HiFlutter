@@ -15,9 +15,8 @@ class VersionsStage implements CheckStage {
 
   @override
   Future<StageResult> run(CheckContext context) async {
-    final packages = loadWorkspace(context.root)
-        .where((pkg) => pkg.publishable)
-        .toList();
+    final allPackages = loadWorkspace(context.root);
+    final packages = allPackages.where((pkg) => pkg.publishable).toList();
     final problems = <String>[];
 
     final byVersion = <String?, List<String>>{};
@@ -32,24 +31,15 @@ class VersionsStage implements CheckStage {
     }
 
     final names = {for (final pkg in packages) pkg.name};
+    String? sharedVersion;
     for (final pkg in packages) {
       final version = pkg.version;
       if (version == null) {
         problems.add('${pkg.name} has no version');
         continue;
       }
-      final expected = '^$version';
-      for (final MapEntry(key: dep, value: spec) in {
-        ...pkg.dependencies,
-        ...pkg.devDependencies,
-      }.entries) {
-        if (names.contains(dep) && spec != expected) {
-          problems.add(
-            '${pkg.name} -> $dep must be constrained to "$expected", '
-            'found "$spec"',
-          );
-        }
-      }
+      sharedVersion ??= version;
+      _checkInterPackageConstraints(pkg, names, '^$version', problems);
 
       final changelog = File(p.join(pkg.dir, 'CHANGELOG.md'));
       final header = RegExp(
@@ -62,6 +52,32 @@ class VersionsStage implements CheckStage {
         problems.add('${pkg.name} CHANGELOG.md lacks a "## $version" header');
       }
     }
+
+    if (byVersion.length <= 1 && sharedVersion != null) {
+      final expected = '^$sharedVersion';
+      for (final pkg in allPackages.where((pkg) => !pkg.publishable)) {
+        _checkInterPackageConstraints(pkg, names, expected, problems);
+      }
+    }
     return StageResult.of(problems);
+  }
+
+  void _checkInterPackageConstraints(
+    WorkspacePackage pkg,
+    Set<String> names,
+    String expected,
+    List<String> problems,
+  ) {
+    for (final MapEntry(key: dep, value: spec) in {
+      ...pkg.dependencies,
+      ...pkg.devDependencies,
+    }.entries) {
+      if (names.contains(dep) && spec != expected) {
+        problems.add(
+          '${pkg.name} -> $dep must be constrained to "$expected", '
+          'found "$spec"',
+        );
+      }
+    }
   }
 }

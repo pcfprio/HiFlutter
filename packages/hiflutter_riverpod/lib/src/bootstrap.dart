@@ -19,14 +19,16 @@ import 'providers.dart';
 ///    the configured contract overrides.
 /// 4. Mount the root widget with `runApp`.
 abstract final class HiRiverpodBootstrap {
-  /// Runs the ordered startup sequence and mounts [child] inside a
-  /// [ProviderScope].
+  /// Runs the ordered startup sequence and mounts [child] (or the widget
+  /// returned by [builder]) inside a [ProviderScope].
   ///
-  /// Both [logger] and [reporter] are automatically bound to
-  /// [hiLoggerProvider] and [hiCrashReporterProvider], followed by any extra
-  /// [overrides] from the composition root. Optional [beforeRunApp] runs inside
-  /// the guarded zone after [WidgetsFlutterBinding.ensureInitialized] and
-  /// before `runApp` is called.
+  /// Exactly one of [child] or [builder] must be provided. Both [logger] and
+  /// [reporter] are automatically bound to [hiLoggerProvider] and
+  /// [hiCrashReporterProvider], followed by any extra [overrides] or
+  /// post-initialization [overridesBuilder] from the composition root.
+  /// Optional [beforeRunApp] runs inside the guarded zone after
+  /// [WidgetsFlutterBinding.ensureInitialized] and before [overridesBuilder],
+  /// [builder], and `runApp` are called.
   ///
   /// The optional [installLogger], [installErrorCapture], and [runAppCallback]
   /// hooks default to [HiLog.install], [HiErrorCapture.install], and [runApp],
@@ -35,8 +37,10 @@ abstract final class HiRiverpodBootstrap {
   static Future<HiErrorCapture> run({
     required HiLogger logger,
     required HiCrashReporter reporter,
-    required Widget child,
+    Widget? child,
+    Widget Function()? builder,
     List<Override> overrides = const [],
+    FutureOr<List<Override>> Function()? overridesBuilder,
     String errorModule = 'error',
     FutureOr<void> Function()? beforeRunApp,
     void Function(HiLogger logger)? installLogger,
@@ -44,6 +48,10 @@ abstract final class HiRiverpodBootstrap {
     installErrorCapture,
     void Function(Widget app)? runAppCallback,
   }) async {
+    assert(
+      (child != null) != (builder != null),
+      'Provide either child or builder (not both) to HiRiverpodBootstrap.run.',
+    );
     (installLogger ?? HiLog.install)(logger);
     final capture = (installErrorCapture ?? HiErrorCapture.install)(
       reporter: reporter,
@@ -57,6 +65,11 @@ abstract final class HiRiverpodBootstrap {
         if (beforeRunApp != null) {
           await beforeRunApp();
         }
+        final resolvedOverrides = <Override>[
+          ...overrides,
+          if (overridesBuilder != null) ...await overridesBuilder(),
+        ];
+        final rootChild = builder != null ? builder() : child!;
         // Nest caller overrides inside a child ProviderScope so callers passing
         // a full `hiProviderOverrides(...)` list never trigger Riverpod's
         // duplicate-override assertion inside a single scope, while preserving
@@ -66,9 +79,9 @@ abstract final class HiRiverpodBootstrap {
             hiLoggerProvider.overrideWithValue(logger),
             hiCrashReporterProvider.overrideWithValue(reporter),
           ],
-          child: overrides.isEmpty
-              ? child
-              : ProviderScope(overrides: overrides, child: child),
+          child: resolvedOverrides.isEmpty
+              ? rootChild
+              : ProviderScope(overrides: resolvedOverrides, child: rootChild),
         );
         (runAppCallback ?? runApp)(defaultScope);
       } finally {

@@ -11,7 +11,7 @@
 ## 命名、边界与依赖约束
 
 1. **`Hi` 类型前缀**：所有公开导出的类、接口、枚举、mixin、extension 与 typedef 统一以 `Hi` 为前缀（如 `HiLogger`、`HiError`、`HiHttpClient`、`HiRoute`、`HiKeyValueStore`、`HiPrimaryButton`）；公开辅助顶级函数尽量以 `hi` 为前缀（如 `hiProviderOverrides`、`hiPaginationProvider`）。
-2. **第三方类型隔离**：第三方依赖类型与异常只能停留在适配包内部实现或明确隔离的测试文件（如 `hiflutter_net_dio` 单独拆出的 `lib/testing.dart`）中，绝不出现在契约包、伞包或适配器主入口的签名与返回值里。
+2. **第三方类型隔离**：第三方依赖类型与异常只能停留在适配包内部实现或明确隔离的测试入口文件（如 `hiflutter_net_dio` 与 `hiflutter_core_device` 单独拆出的 `lib/testing.dart`）中，绝不出现在契约包、伞包或适配器主入口的签名与返回值里。
 3. **禁止导入已弃用的 `package:flutter/material.dart`**：
    - 通用 Flutter 包（`hiflutter_core`、`hiflutter_nav`、`hiflutter_riverpod` 等）统一导入 `package:flutter/widgets.dart` 与 `package:flutter/foundation.dart`；
    - 需要 Material 3 组件时，仅可在 `tool/src/package_rules.dart` 明确允许依赖 `material_ui` 的 UI 包（`hiflutter_suite` 及其适配包）与 `apps/showcase` 中导入 `package:material_ui/material_ui.dart`。
@@ -38,7 +38,7 @@
    - 测试只断言外部可观察行为：返回值、抛出 `HiError` 类型与属性、sink 收到的 `HiLogRecord`、存储读回结果、Widget 渲染节点与点击交互结果。
 2. **第三方库最低替换点假实现**：
    - 适配包不连接真实网络或依赖真机通道；在第三方库官方提供的最低接口替换点注入轻量假实现：
-     - `hiflutter_net_dio`：经隔离的 `testing.dart` 传入伪造 Dio `HttpClientAdapter`；
+     - `hiflutter_net_dio`、`hiflutter_core_device`：通过各自隔离的 `lib/testing.dart` 传入伪造 Dio `HttpClientAdapter` 或跨平台 `BaseDeviceInfo` 加载器；
      - `path_provider`、`device_info_plus`、`package_info_plus`、`connectivity_plus`、`url_launcher`、`shared_preferences`、`flutter_secure_storage`、`webview_flutter`：在测试 `setUp` 中注册各自的 `*_platform_interface` 假平台实现；
      - `hiflutter_nav_go_router`：直接在 `testWidgets` 中构建真实 `HiGoRouterNavigator` 驱动界面跳转与深链解析；
      - `hiflutter_suite_cached_image`：注入可控的缓存/图片加载边界并在 Widget 测试中校验状态视图与点击交互。

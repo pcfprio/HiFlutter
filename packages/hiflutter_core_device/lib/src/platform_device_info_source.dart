@@ -14,13 +14,37 @@ final class HiPlatformDeviceInfoSource implements HiDeviceInfoSource {
   const HiPlatformDeviceInfoSource();
 
   @override
-  Future<HiAppDeviceInfo> load() async {
-    try {
-      final packageInfo = await PackageInfo.fromPlatform();
-      final deviceInfo = await DeviceInfoPlugin().deviceInfo;
-      return mapPlatformDeviceInfo(packageInfo, deviceInfo);
-    } catch (error, stackTrace) {
-      Error.throwWithStackTrace(HiError.from(error, stackTrace), stackTrace);
-    }
+  Future<HiAppDeviceInfo> load() =>
+      _loadWith(() => DeviceInfoPlugin().deviceInfo);
+}
+
+Future<HiAppDeviceInfo> _loadWith(
+  Future<BaseDeviceInfo> Function() loadDeviceInfo,
+) async {
+  try {
+    final packageInfo = await PackageInfo.fromPlatform();
+    final deviceInfo = await loadDeviceInfo();
+    return mapPlatformDeviceInfo(packageInfo, deviceInfo);
+  } catch (error, stackTrace) {
+    Error.throwWithStackTrace(HiError.from(error, stackTrace), stackTrace);
   }
 }
+
+final class _CustomPlatformDeviceInfoSource implements HiDeviceInfoSource {
+  const _CustomPlatformDeviceInfoSource(this._loadDeviceInfo);
+
+  final Future<BaseDeviceInfo> Function() _loadDeviceInfo;
+
+  @override
+  Future<HiAppDeviceInfo> load() => _loadWith(_loadDeviceInfo);
+}
+
+/// Creates a [HiDeviceInfoSource] backed by `PackageInfo.fromPlatform()` and a
+/// custom [loadDeviceInfo] callback for cross-platform adapter tests.
+///
+/// Exposed exclusively from `package:hiflutter_core_device/testing.dart` so
+/// `package:hiflutter_core_device/hiflutter_core_device.dart` never leaks
+/// `device_info_plus` types.
+HiDeviceInfoSource hiDeviceInfoSourceWithLoader(
+  Future<BaseDeviceInfo> Function() loadDeviceInfo,
+) => _CustomPlatformDeviceInfoSource(loadDeviceInfo);

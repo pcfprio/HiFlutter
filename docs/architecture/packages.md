@@ -60,7 +60,7 @@ HiFlutter 采用 Dart pub workspace 管理多包架构（详见 [ADR-0004](../ad
 - **状态管理绑定**：`hiflutter_riverpod`，保证选用 Bloc 等其他方案的消费项目无需引入 Riverpod；
 - **独立工具与示例**：`hiflutter_tool`（开发者 CLI）与 `apps/showcase`（`publish_to: none` 示例 App）。
 
-此外，多模块消费项目也可不依赖伞包，仅按需引入单个契约包及其选定适配包，确保未使用的原生插件代码不进入构建产物。
+此外，按能力分包接入的大型消费项目也可不依赖伞包，仅按需引入单个契约包及其选定适配包，确保未使用的原生插件代码不进入构建产物。
 
 ## 明确不预置的能力
 

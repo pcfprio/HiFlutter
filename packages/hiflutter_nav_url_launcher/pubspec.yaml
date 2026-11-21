@@ -19,6 +19,7 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
+  hiflutter_base: ^0.1.0
   hiflutter_nav: ^0.1.0
   url_launcher: ^6.3.3
 

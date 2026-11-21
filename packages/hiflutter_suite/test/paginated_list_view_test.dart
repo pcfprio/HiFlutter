@@ -227,6 +227,30 @@ void main() {
     );
 
     testWidgets(
+      'falls back to empty state when initial load fails with HiCancelledError',
+      (tester) async {
+        final controller = HiPaginationController<String>(
+          loader: (_) async => throw const HiCancelledError(),
+        );
+        addTearDown(controller.dispose);
+
+        await tester.pumpWidget(
+          _wrap(
+            HiPaginatedListView<String>(
+              controller: controller,
+              emptyTitle: 'Nothing loaded',
+              itemBuilder: (context, item, index) => Text(item),
+            ),
+          ),
+        );
+        await tester.pump();
+        await tester.pump();
+
+        expect(find.text('Nothing loaded'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
       'supports separatorBuilder without adding separator before footer',
       (tester) async {
         final controller = HiPaginationController<String>(

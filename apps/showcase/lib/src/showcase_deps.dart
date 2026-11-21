@@ -154,19 +154,23 @@ final class ShowcaseDependencies {
     required HiLogger logger,
     required ShowcaseLogSink logSink,
     DeferredFileLogSink? fileSinkTarget,
+    HiConsent? consent,
+    HiCrashReporter? crashReporter,
   }) async {
     final fileLogSink = await HiFileLogSink.inApplicationSupport();
     fileSinkTarget?.attach(fileLogSink);
-    final consent = HiConsent();
+    final effectiveConsent = consent ?? HiConsent();
     final analyticsSink = ShowcaseAnalyticsSink();
     final analytics = HiConsentGatedAnalytics(
       HiCompositeAnalytics([const HiConsoleAnalytics(), analyticsSink]),
-      consent: consent,
+      consent: effectiveConsent,
     );
-    final crashReporter = HiConsentGatedCrashReporter(
-      const HiNoOpCrashReporter(),
-      consent: consent,
-    );
+    final effectiveReporter =
+        crashReporter ??
+        HiConsentGatedCrashReporter(
+          const HiNoOpCrashReporter(),
+          consent: effectiveConsent,
+        );
     final client = HiHttpClient(
       transport: HiDioTransport(connectTimeout: const Duration(seconds: 10)),
       baseUrl: Uri.parse('https://httpbin.org/'),
@@ -177,10 +181,10 @@ final class ShowcaseDependencies {
     return ShowcaseDependencies._(
       logger: logger,
       logSink: logSink,
-      consent: consent,
+      consent: effectiveConsent,
       analyticsSink: analyticsSink,
       analytics: analytics,
-      crashReporter: crashReporter,
+      crashReporter: effectiveReporter,
       httpClient: client,
       connectivity: HiPlusConnectivity(),
       keyValueStore: HiKeyValueStore(HiPrefsKeyValueBackend()),

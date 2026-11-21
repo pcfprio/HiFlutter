@@ -339,14 +339,14 @@ void main() {
       });
     }
 
-    test('maps non-DioException errors via HiError.from', () async {
-      final adapter = _FakeAdapter(
+    test('unwraps inner non-DioException errors via HiError.from', () async {
+      final decodeAdapter = _FakeAdapter(
         (_, _, _) async => throw const FormatException('bad wire data'),
       );
-      final transport = hiDioTransportWithAdapter(adapter);
+      final decodeTransport = hiDioTransportWithAdapter(decodeAdapter);
 
-      final error = await _failureOf(
-        transport.send(
+      final decodeError = await _failureOf(
+        decodeTransport.send(
           HiRequest(
             method: HiHttpMethod.get,
             url: Uri.parse('https://api.example.com/err'),
@@ -354,8 +354,25 @@ void main() {
         ),
       );
 
-      expect(error, isA<HiUnknownError>());
-      expect(error.diagnostics, contains('bad wire data'));
+      expect(decodeError, isA<HiDecodeError>());
+      expect(decodeError.diagnostics, contains('bad wire data'));
+
+      final timeoutAdapter = _FakeAdapter(
+        (_, _, _) async => throw TimeoutException('socket timed out'),
+      );
+      final timeoutTransport = hiDioTransportWithAdapter(timeoutAdapter);
+
+      final timeoutError = await _failureOf(
+        timeoutTransport.send(
+          HiRequest(
+            method: HiHttpMethod.get,
+            url: Uri.parse('https://api.example.com/timeout'),
+          ),
+        ),
+      );
+
+      expect(timeoutError, isA<HiTimeoutError>());
+      expect(timeoutError.diagnostics, contains('socket timed out'));
     });
   });
 

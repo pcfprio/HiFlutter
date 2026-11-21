@@ -2,4 +2,4 @@
 /// `hiflutter_core` [HiDeviceInfoSource] contract.
 library;
 
-export 'src/platform_device_info_source.dart';
+export 'src/platform_device_info_source.dart' show HiPlatformDeviceInfoSource;
